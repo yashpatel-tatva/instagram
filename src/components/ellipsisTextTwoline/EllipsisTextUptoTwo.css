@@ -1,0 +1,20 @@
+.ellipsisContainer {
+    position: relative;
+    max-height: 4em;
+    /* 2 lines assuming 2em line height */
+    overflow: hidden;
+}
+
+.ellipsis-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    /* Limit to 2 lines */
+}
+
+.ellipsis-text.expanded {
+    -webkit-line-clamp: unset;
+    /* Show all lines when expanded */
+}

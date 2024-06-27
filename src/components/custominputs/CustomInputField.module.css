@@ -1,0 +1,68 @@
+.formGroup {
+    position: relative;
+    /* border: 1px solid; */
+    border: 1px solid darkgray;
+    overflow: hidden;
+    background-color: #00000015;
+}
+
+.formGroup input {
+    width: 100%;
+    outline: none;
+    border: 0;
+    padding: 10px 10px 7px 10px;
+    font-size: 1em;
+    background-color: transparent;
+}
+
+
+.formGroup span {
+    position: absolute;
+    left: 10px;
+    top: 9px;
+    pointer-events: none;
+    font-size: 1em;
+    transition: 0.20s;
+    color: darkgrey;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90%;
+}
+
+input:not(:placeholder-shown):not(:focus)+span {
+    /* color: inherit; */
+    color: darkgray;
+    transform: translateX(-3px) translateY(-9px);
+    font-size: 0.75em;
+    padding: 0px 5px;
+    background-color: transparent;
+}
+
+input:focus+span,
+input:not(:placeholder-shown)+span {
+    color: #8db2db;
+    transform: translateX(-3px) translateY(-9px);
+    font-size: 0.75em !important;
+    padding: 0px 5px;
+    background-color: transparent;
+}
+
+.formControl:focus {
+    box-shadow: none;
+    background-color: transparent;
+}
+
+
+.formGroup:focus-within {
+    border: 1px solid #8db2db;
+}
+
+.passshow {
+    background-color: transparent;
+    height: 100%;
+    font-size: medium;
+    padding-right: 5px;
+    font-family: monospace;
+    user-select: none;
+}

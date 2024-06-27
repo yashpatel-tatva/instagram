@@ -1,0 +1,10 @@
+.phone {
+    position: relative;
+    width: fit-content;
+}
+
+.phonescreen {
+    position: absolute;
+    top: 4%;
+    right: 13%;
+}

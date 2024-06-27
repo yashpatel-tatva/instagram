@@ -1,0 +1,22 @@
+::-webkit-scrollbar {
+    display: none;
+}
+
+.populerscroll {
+    width: 100%;
+    display: flex;
+    overflow-x: scroll;
+    gap: 15px;
+    cursor: pointer;
+    align-items: center;
+}
+
+.scrollbtns {
+    position: absolute;
+    transition: 0.5s;
+    opacity: 0.4;
+}
+
+.scrollbtns:hover {
+    opacity: 1;
+}

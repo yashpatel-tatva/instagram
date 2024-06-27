@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style type="text/css">
+	.bentblocks_een{fill:#0B1719;}
+	.st0{fill:#0B1719;}
+</style>
+  </defs>
+  <path class="bentblocks_een" d="M21.081,6C23.752,6.031,26,8.766,26,12c0,5.106-6.47,10.969-10.001,13.593&#10;&#9;C12.466,22.974,6,17.12,6,12c0-3.234,2.248-5.969,4.918-6C13.586,6.175,13.926,6.801,16,8.879C18.069,6.806,18.418,6.173,21.081,6&#10;&#9; M20.911,4.006L20.912,4C18.993,4,17.259,4.785,16,6.048C14.741,4.785,13.007,4,11.088,4l0.001,0.006C7.044,3.936,4,7.719,4,12&#10;&#9;c0,8,11.938,16,11.938,16h0.124C16.062,28,28,20,28,12C28,7.713,24.951,3.936,20.911,4.006z" style="fill: rgb(0, 0, 0);"/>
+  <rect x="8.232" y="6.688" width="16.772" height="11.558" style="stroke: rgb(0, 0, 0);"/>
+  <rect x="10.221" y="5.831" width="0.583" height="0.069" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="11.147" y="6.036" width="1.303" height="0.377" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="19.481" y="6.208" width="2.641" height="0.069" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="25.483" y="9.123" width="0.755" height="5.762" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="7.374" y="7.203" width="0.412" height="10.255" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="5.796" y="8.643" width="1.098" height="7.648" style="stroke: rgb(0, 0, 0);"/>
+  <rect x="8.78" y="18.349" width="14.508" height="0.446" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="9.055" y="18.967" width="14.234" height="0.617" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="9.466" y="19.481" width="12.965" height="0.926" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="10.255" y="20.51" width="11.661" height="0.96" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="11.147" y="22.019" width="10.495" height="0.103" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="13.136" y="22.911" width="4.322" height="0.034" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="14.302" y="23.563" width="3.533" height="0.069" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="17.218" y="26.066" width="2.71" height="0.034" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+  <rect x="15.64" y="24.592" width="1.543" height="0.069" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="17.595" y="27.027" width="1.2" height="0.034" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+  <rect x="17.458" y="27.404" width="1.269" height="0.034" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+  <rect x="18.247" y="22.019" width="0.137" height="1.269" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="18.212" y="22.774" width="0.24" height="0.652" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <rect x="20.99" y="23.94" width="0.103" height="0.549" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+  <rect x="21.128" y="23.974" width="0.069" height="0.617" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+  <rect x="15.125" y="24.592" width="0.034" height="0.206" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+  <rect x="15.057" y="24.42" width="0.069" height="0.24" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+  <rect x="14.714" y="24.249" width="0.034" height="0.034" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+  <rect x="14.782" y="24.592" width="0.103" height="0.103" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+  <rect x="14.68" y="24.626" width="0.171" height="0.412" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+  <rect x="15.091" y="25.175" width="0.24" height="0.206" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+  <rect x="15.4" y="25.449" width="0.206" height="0.069" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+  <rect x="15.674" y="25.518" width="0.171" height="0.034" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+  <rect x="15.983" y="25.552" width="0.446" height="0.343" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+  <rect x="16.6" y="26.066" width="0.24" height="0.309" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" transform="matrix(1, 0, 0, 1, -1.9892820119857788, -1.8177920579910278)"/>
+</svg>

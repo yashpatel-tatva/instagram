@@ -31,17 +31,20 @@ export const isLoginValid = (id, password) => {
     return true;
 }
 
-export const isSignupValid = (id, username, password) => {
-    if (isNullOrEmptyOrWhitespace(id) || isNullOrEmptyOrWhitespace(password) || isNullOrEmptyOrWhitespace(username)) {
+export const isSignupValid = (email, mobile, username, password) => {
+    if (isNullOrEmptyOrWhitespace(email) || isNullOrEmptyOrWhitespace(password) || isNullOrEmptyOrWhitespace(username)) {
         return false;
     }
-    if (!(phoneValid(id) || emailValid(id))) {
+    if (!(emailValid(email))) {
         return false;
     }
     if (!(passwordValid(password))) {
         return false;
     }
     if (!(usernameValid(username))) {
+        return false;
+    }
+    if (!isNullOrEmptyOrWhitespace(mobile) && !phoneValid(mobile)) {
         return false;
     }
     return true;

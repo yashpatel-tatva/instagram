@@ -8,52 +8,83 @@ import { AllRoutes } from '../../constants/AllRoutes'
 import appStore from '../../assets/img/png/app-store.png'
 import googlePlay from '../../assets/img/png/google-play.png'
 import FacebookIcon from '@mui/icons-material/Facebook';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { isSignupValid, emailValid, phoneValid, passwordValid, usernameValid, getIdType } from '../../hooks/ValidationHook'
+import { useDispatch } from "react-redux";
+import { login, signup, useSelectorUserState } from "../../redux/slices/AuthSlice";
+import { LoadingButton } from "@mui/lab";
+import ErrorModal from "../../components/errormodal/ErrorModal";
+// import PasswordChecklist from "react-password-checklist"
 
 
 export const SignUp = () => {
-    const [emailormobile, setEmailormobile] = useState();
+    const [email, setEmail] = useState();
+    const [mobile, setMobile] = useState();
     const [fullname, setFullname] = useState();
     const [username, setUsername] = useState();
-    const [password, setPassword] = useState();
+    const [password, setPassword] = useState("");
 
-    const [emailormobilestate, setEmailormobileState] = useState();
+    const [emailstate, setEmailState] = useState();
+    const [mobilestate, setMobileState] = useState();
     const [usernamestate, setUsernamestate] = useState();
     const [passwordstate, setPasswordstate] = useState();
     const [isValidForm, setIsValidForm] = useState(false);
 
+    const { ErrorMessage, isError, success, loading } = useSelectorUserState();
 
-    function emailormobileHandler(value) {
-        setEmailormobile(value);
-        setEmailormobileState(emailValid(value) || phoneValid(value));
-        validForm(value, username, password);
+
+    const dispatch = useDispatch();
+
+    function emailHandler(value) {
+        setEmail(value);
+        setEmailState(emailValid(value));
+        validForm(value, mobile, username, password);
+    }
+    function mobileHandler(value) {
+        setMobile(value);
+        setMobileState(phoneValid(value))
+        validForm(email, value, username, password)
     }
     function fullnameHandler(value) {
         setFullname(value);
     }
     function usernamHandler(value) {
         setUsername(value)
-        validForm(emailormobile, value, password)
+        validForm(email, mobile, value, password)
         setUsernamestate(usernameValid(value))
     }
     function passwordHandler(value) {
         setPassword(value);
-        validForm(emailormobile, username, value)
+        validForm(email, mobile, username, value)
         setPasswordstate(passwordValid(value))
     }
 
-    function validForm(id, username, password) {
-        if (!isSignupValid(id, username, password)) {
+    function validForm(email, mobile, username, password) {
+        if (!isSignupValid(email, mobile, username, password)) {
             setIsValidForm(false);
             return;
         }
         setIsValidForm(true)
     }
     function handleSignup() {
-        const data = { id: emailormobile, fullname: fullname, username: username, password: password, type: getIdType(emailormobile) };
-        console.log(data)
+        const data = {
+            email: email,
+            contactNumber: mobile,
+            name: fullname,
+            userName: username,
+            password: password,
+            type: getIdType(email),
+        };
+        dispatch(signup(data));
     }
+
+    useEffect(() => {
+        if (success) {
+            dispatch(login({ userId: email, password: password, typeUserId: getIdType(email) }))
+        }
+    }, [success]);
+
+
     return (
         <div className="flex items-center justify-center h-screen">
             <LandPhoneImg />
@@ -76,12 +107,24 @@ export const SignUp = () => {
                         </Button>
                     </div>
                     <span className="divider">OR</span>
-                    <CustomInputField label={"Phone Number or Email"} type={"text"} onInputChange={emailormobileHandler} iconType={emailormobilestate} />
+                    <CustomInputField label={"Email"} type={"text"} onInputChange={emailHandler} iconType={emailstate} />
+                    <CustomInputField label={"Phone Numeer"} type={"text"} onInputChange={mobileHandler} iconType={mobilestate} />
                     <CustomInputField label={"Full Name"} type={"text"} onInputChange={fullnameHandler} iconType={"none"} />
                     <CustomInputField label={"Username"} type={"text"} onInputChange={usernamHandler} iconType={usernamestate} />
                     <CustomInputField label={"Password"} type={"password"} onInputChange={passwordHandler} iconType={passwordstate} />
+                    {password.length !== 0 && !passwordstate &&
+                        // <PasswordChecklist
+                        //     rules={["minLength", "specialChar", "number", "capital", "lowercase"]}
+                        //     minLength={7}
+                        //     value={password}
+                        //     onChange={() => { }}
+                        // />
+                        <span className="text-red-600">(Password should be 'Abc@1' Format with 7 characters)</span>
+                    }
+                    {isError && <div className="text-center"><ErrorModal open={true} message={ErrorMessage} /></div>}
                     <div className="my-2">
-                        <Button
+                        <LoadingButton
+                            loading={loading}
                             variant="contained"
                             fullWidth
                             sx={{ textTransform: 'none' }}
@@ -90,7 +133,7 @@ export const SignUp = () => {
                             onClick={handleSignup}
                         >
                             Sign up
-                        </Button>
+                        </LoadingButton>
                     </div>
                 </div>
                 <div className="darkvorder py-3 md:border-none w-9/12 sm:w-full flex items-center justify-center" style={{ maxWidth: '420px', minWidth: '320px' }}>

@@ -3,10 +3,11 @@
     /* border: 1px solid; */
     border: 1px solid darkgray;
     overflow: hidden;
-    background-color: #00000015;
+    background-color: rgb(243 244 246);
 }
 
-.formGroup input {
+.formGroup input,
+.formGroup select {
     width: 100%;
     outline: none;
     border: 0;
@@ -30,7 +31,8 @@
     max-width: 90%;
 }
 
-input:not(:placeholder-shown):not(:focus)+span {
+input:not(:placeholder-shown):not(:focus)+span,
+select+span {
     /* color: inherit; */
     color: darkgray;
     transform: translateX(-3px) translateY(-9px);
@@ -40,7 +42,8 @@ input:not(:placeholder-shown):not(:focus)+span {
 }
 
 input:focus+span,
-input:not(:placeholder-shown)+span {
+input:not(:placeholder-shown)+span,
+select+span {
     color: #8db2db;
     transform: translateX(-3px) translateY(-9px);
     font-size: 0.75em !important;

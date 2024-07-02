@@ -2,28 +2,37 @@ import LandPhoneImg from "../../components/landphoneimg/LandPhoneImg";
 import '../../App.css'
 import CustomInputField from "../../components/custominputs/CustomInputField";
 import instaTextLogo from '../../assets/img/png/instaTextLogo.png'
-import { Button } from "@mui/material";
+import LoadingButton from '@mui/lab/LoadingButton';
 import facebook from '../../assets/img/png/facebook.png'
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { AllRoutes } from '../../constants/AllRoutes'
 import appStore from '../../assets/img/png/app-store.png'
 import googlePlay from '../../assets/img/png/google-play.png'
 import { useState } from "react";
-import { isLoginValid, getIdType } from '../../hooks/ValidationHook'
+import { isLoginValid, getIdType, passwordValid } from '../../hooks/ValidationHook'
 import { useDispatch } from "react-redux";
-import { login } from "../../redux/slices/AuthSlice";
+import { login, useSelectorUserState } from "../../redux/slices/AuthSlice";
+import ErrorModal from "../../components/errormodal/ErrorModal";
+// import PasswordChecklist from "react-password-checklist"
+
 
 export const Login = () => {
 
     const dispatch = useDispatch();
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     const [isValidtoLogin, setIsValidtoLogin] = useState(false)
-    const [password, setPassword] = useState();
+    const [password, setPassword] = useState("");
+    const [passwordstate, setPasswordstate] = useState();
     const [id, setId] = useState();
+    const { ErrorMessage, isError, loading } = useSelectorUserState();
+
+
+
     function passwordHandler(value) {
         setPassword(value);
         validform(id, value)
+        setPasswordstate(passwordValid(value))
     }
     function idhandler(value) {
         setId(value);
@@ -35,7 +44,7 @@ export const Login = () => {
 
     async function handleLogin() {
         const data = { userId: id, password: password, typeUserId: getIdType(id) };
-        const res = await dispatch(login(data));
+        dispatch(login(data));
     }
     return (
         <div className="flex items-center justify-center h-screen">
@@ -47,8 +56,18 @@ export const Login = () => {
                     </div>
                     <CustomInputField label={"Phone Number , Email or Username"} type={"text"} onInputChange={idhandler} />
                     <CustomInputField label={"Password"} type={"password"} onInputChange={passwordHandler} />
+                    {password.length !== 0 && !passwordstate &&
+                        // <PasswordChecklist
+                        //     rules={["minLength", "specialChar", "number", "capital", "lowercase"]}
+                        //     minLength={7}
+                        //     value={password}
+                        //     onChange={() => { }}
+                        // />
+                        <span className="text-red-600">(Password should be 'Abc@1' Format with 7 characters)</span>
+                    }
                     <div className="my-2">
-                        <Button
+                        <LoadingButton
+                            loading={loading}
                             variant="contained"
                             fullWidth
                             sx={{ textTransform: 'none' }}
@@ -57,12 +76,13 @@ export const Login = () => {
                             onClick={handleLogin}
                         >
                             Log in
-                        </Button>
+                        </LoadingButton>
                     </div>
                     <span className="divider">OR</span>
                     <div className="mt-4 mb-3 flex items-center justify-center gap-4" style={{ color: '#3A559F' }}>
                         <img src={facebook} width={'8%'} alt="" /> Log in with Facebook
                     </div>
+                    {isError && <div className="text-center"><ErrorModal open={true} message={ErrorMessage} /></div>}
                     <div className="mt-4 mb-3 flex items-center justify-center gap-4" style={{ color: '#3A559F', fontSize: 'small' }}>
                         <Link to={AllRoutes.ForgetPassword} >Forget Password?</Link>
                     </div>

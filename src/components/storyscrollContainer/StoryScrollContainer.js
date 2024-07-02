@@ -26,6 +26,7 @@ function StoryScrollContainer({ list, onClick }) {
 
         return () => {
             if (scrollRef.current) {
+                // eslint-disable-next-line react-hooks/exhaustive-deps
                 scrollRef.current.removeEventListener('scroll', handleScroll);
             }
         };

@@ -3,7 +3,7 @@ import styles from './CustomInputField.module.css'
 import CheckCircleTwoToneIcon from '@mui/icons-material/CheckCircleTwoTone';
 import CancelTwoToneIcon from '@mui/icons-material/CancelTwoTone';
 
-const CustomInputField = ({ label, type, onInputChange, iconType = "none" }) => {
+const CustomInputField = ({ label, type, onInputChange, iconType = "none", id = '' }) => {
     const [inputType, setInputType] = useState(type);
     const [showPass, setShowPass] = useState(false);
     const [inputValue, setInputValue] = useState('');
@@ -16,10 +16,10 @@ const CustomInputField = ({ label, type, onInputChange, iconType = "none" }) => 
     const handleChange = (e) => {
         const value = e.target.value;
         setInputValue(value);
+        onInputChange(value);
     };
     const handleBlur = (e) => {
-        const value = e.target.value;
-        onInputChange(value);
+        // const value = e.target.value;
         setshowicon(true)
     };
 

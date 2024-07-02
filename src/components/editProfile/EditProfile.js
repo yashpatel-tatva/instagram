@@ -99,8 +99,8 @@ const EditProfile = () => {
   }, [isProfileUpdated]);
 
   const handleFileChange = async (event) => {
-    const file = event.target.files ? event.target.files[0] : null;
-    if (!file || (file && allowedTypes.includes(file.type))) {
+    const file = event.target.files[0];
+    if (file && allowedTypes.includes(file.type)) {
       const formData = new FormData();
       // formData.append("UserId", userid);
       formData.append("ProfilePhoto", file);
@@ -126,6 +126,28 @@ const EditProfile = () => {
     }
   };
 
+  const handledelete = async () => {
+    const formData = new FormData();
+    // formData.append("UserId", userid);
+    formData.append("ProfilePhoto", null);
+    const res = await dispatch(changeuserphoto(formData));
+    if (res.payload.isSuccess) {
+      await dispatch(
+        getuserphoto({
+          userId: userid,
+          photoName: res.payload.data.profilePhotoName,
+        })
+      );
+    } else {
+      Swal.fire({
+        position: "top-end",
+        icon: "error",
+        title: "Some Issue By server",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    }
+  };
   const validate = (values) => {
     const errors = {};
 
@@ -254,7 +276,7 @@ const EditProfile = () => {
                     <IconButton
                       aria-label="delete"
                       size="large"
-                      onClick={handleFileChange}
+                      onClick={handledelete}
                     >
                       <DeleteIcon fontSize="inherit" />
                     </IconButton>

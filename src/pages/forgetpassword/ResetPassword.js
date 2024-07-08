@@ -44,6 +44,7 @@ const ResetPassword = () => {
         timer: 1500,
       });
       dispatch(authAction.resetSuccess());
+      dispatch(authAction.resetSuccess());
       navigate(AllRoutes.Login);
     }
   });

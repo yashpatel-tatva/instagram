@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { assets } from "../constants/Assets";
-import { IconButton, Stack } from "@mui/material";
+import { Drawer, IconButton, Stack } from "@mui/material";
 import "../App.css";
 import { NavLink, useNavigate } from "react-router-dom";
 import { AllRoutes } from "../constants/AllRoutes";
@@ -14,8 +14,10 @@ import {
   getuserdata,
   useSelectorUserAction,
 } from "../redux/slices/UserActionSlice";
-import { Bounce, ToastContainer, toast } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
+import { Bounce, toast } from "react-toastify";
+import AddSelectPopUp from "../components/addselector/AddSelectPopUp";
+import Search from "../components/search/Search";
+import Notificaion from "../components/notification/Notificaion";
 
 const SideBottomBar = ({ children }) => {
   const dispatch = useDispatch();
@@ -25,36 +27,35 @@ const SideBottomBar = ({ children }) => {
     navigate(AllRoutes.Home);
   }
   const { userid } = useSelectorUserState();
-  console.log(userid);
   const { success, Notification, ErrorMessage, isError, userPhoto } =
     useSelectorUserAction();
 
   useEffect(() => {
     if (success && Notification !== "") {
-      toast.success(Notification, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-      });
+      // toast.success(Notification, {
+      //   position: "top-right",
+      //   autoClose: 1500,
+      //   hideProgressBar: false,
+      //   closeOnClick: true,
+      //   pauseOnHover: true,
+      //   draggable: true,
+      //   progress: undefined,
+      //   theme: "light",
+      //   transition: Bounce,
+      // });
     }
     if (isError) {
-      toast.error(ErrorMessage, {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-      });
+      // toast.error(ErrorMessage, {
+      //   position: "top-right",
+      //   autoClose: 1500,
+      //   hideProgressBar: false,
+      //   closeOnClick: true,
+      //   pauseOnHover: true,
+      //   draggable: true,
+      //   progress: undefined,
+      //   theme: "light",
+      //   transition: Bounce,
+      // });
     }
   }, [success, isError, Notification, ErrorMessage]);
 
@@ -62,8 +63,21 @@ const SideBottomBar = ({ children }) => {
     dispatch(getuserdata(userid));
   }, [dispatch, userid]);
 
+  const [openSearch, setOpenSearch] = React.useState(false);
+
+  const toggleSearchDrawer = (newOpen) => () => {
+    if (newOpen) setOpenNotification(false);
+    setOpenSearch(newOpen);
+  };
+  const [openNotification, setOpenNotification] = React.useState(false);
+
+  const toggleNotificationDrawer = (newOpen) => () => {
+    if (newOpen) setOpenSearch(false);
+    setOpenNotification(newOpen);
+  };
+
   return (
-    <div className="displaytype w-screen">
+    <div className="displaytype w-screen z-30 relative">
       {/* <ToastContainer></ToastContainer> */}
       <div className="uptotab sidebar float-left">
         <div
@@ -92,25 +106,23 @@ const SideBottomBar = ({ children }) => {
                   </div>
                 )}
               </NavLink>
-              <NavLink to={AllRoutes.Search}>
-                {({ isActive }) => (
-                  <div
-                    role="button"
-                    className={`flex gap-2 items-center ${
-                      isActive ? "text-blue-500" : "text-gray-500"
-                    }`}
-                  >
-                    <img
-                      src={
-                        isActive ? assets.searchActiveIcon : assets.searchIcon
-                      }
-                      width={"28px"}
-                      alt=""
-                    />
-                    <span className="md:hidden">Search</span>
-                  </div>
-                )}
-              </NavLink>
+              <div onClick={toggleSearchDrawer(true)}>
+                <div
+                  role="button"
+                  className={`flex gap-2 items-center ${
+                    openSearch ? "text-blue-500" : "text-gray-500"
+                  }`}
+                >
+                  <img
+                    src={
+                      openSearch ? assets.searchActiveIcon : assets.searchIcon
+                    }
+                    width={"28px"}
+                    alt=""
+                  />
+                  <span className="md:hidden">Search</span>
+                </div>
+              </div>
               <NavLink to={AllRoutes.Explore}>
                 {({ isActive }) => (
                   <div
@@ -164,35 +176,28 @@ const SideBottomBar = ({ children }) => {
                   </div>
                 )}
               </NavLink>
-              <NavLink to={AllRoutes.Notification}>
-                {({ isActive }) => (
-                  <div
-                    role="button"
-                    className={`flex gap-2 items-center ${
-                      isActive ? "text-blue-500" : "text-gray-500"
-                    }`}
-                  >
-                    <img
-                      src={
-                        isActive
-                          ? assets.notificationActiveIcon
-                          : assets.notificationIcon
-                      }
-                      width={"28px"}
-                      alt=""
-                    />
-                    <span className="md:hidden">Notification</span>
-                  </div>
-                )}
-              </NavLink>
-              <NavLink>
-                {/* {({ isActive }) => ( */}
-                <div role="button" className={`flex gap-2 items-center`}>
-                  <img src={assets.addIcon} width={"28px"} alt="" />
-                  <span className="md:hidden">Add</span>
+              <div onClick={toggleNotificationDrawer(true)}>
+                <div
+                  role="button"
+                  className={`flex gap-2 items-center ${
+                    openNotification ? "text-blue-500" : "text-gray-500"
+                  }`}
+                >
+                  <img
+                    src={
+                      openNotification
+                        ? assets.notificationActiveIcon
+                        : assets.notificationIcon
+                    }
+                    width={"28px"}
+                    alt=""
+                  />
+                  <span className="md:hidden">Notification</span>
                 </div>
-                {/* )} */}
-              </NavLink>
+              </div>
+              <div>
+                <AddSelectPopUp></AddSelectPopUp>
+              </div>
               <NavLink to={AllRoutes.UserProfile}>
                 {({ isActive }) => (
                   <div
@@ -220,7 +225,7 @@ const SideBottomBar = ({ children }) => {
             </Stack>
           </Stack>
           <div>
-            <PopupState variant="popover" popupId="demo-popup-menu">
+            <PopupState variant="popover" popupId="setting">
               {(popupState) => (
                 <React.Fragment>
                   <IconButton variant="contained" {...bindTrigger(popupState)}>
@@ -235,7 +240,7 @@ const SideBottomBar = ({ children }) => {
           </div>
         </div>
       </div>
-      <div className="formobile bottombar w-screen">
+      <div className="formobile bottombar w-screen z-50 ">
         <div className="w-full border-t-2" style={{ padding: "2%" }}>
           <Stack direction={"row"} justifyContent={"space-around"}>
             <NavLink to={AllRoutes.Home}>
@@ -255,23 +260,21 @@ const SideBottomBar = ({ children }) => {
                 </div>
               )}
             </NavLink>
-            <NavLink to={AllRoutes.Search}>
-              {({ isActive }) => (
-                <div
-                  role="button"
-                  className={`flex gap-2 items-center ${
-                    isActive ? "text-blue-500" : "text-gray-500"
-                  }`}
-                >
-                  <img
-                    src={isActive ? assets.searchActiveIcon : assets.searchIcon}
-                    width={"28px"}
-                    alt=""
-                  />
-                  <span className="md:hidden">Search</span>
-                </div>
-              )}
-            </NavLink>
+            <div onClick={toggleSearchDrawer(true)}>
+              <div
+                role="button"
+                className={`flex gap-2 items-center ${
+                  openSearch ? "text-blue-500" : "text-gray-500"
+                }`}
+              >
+                <img
+                  src={openSearch ? assets.searchActiveIcon : assets.searchIcon}
+                  width={"28px"}
+                  alt=""
+                />
+                <span className="md:hidden">Search</span>
+              </div>
+            </div>
             <NavLink to={AllRoutes.Reels}>
               {({ isActive }) => (
                 <div
@@ -334,11 +337,29 @@ const SideBottomBar = ({ children }) => {
         </div>
       </div>
       <div
-        className="overflow-y-scroll  h-screen"
+        className="overflow-y-scroll  h-screen pb-12"
         style={{ overflowWrap: "anywhere" }}
       >
         {children}
       </div>
+      <Drawer open={openSearch} onClose={toggleSearchDrawer(false)}>
+        <div
+          className="fm:w-screen"
+          style={{ minWidth: "325px", maxWidth: "400px" }}
+        >
+          <Search closeDrawer={toggleSearchDrawer(false)}></Search>
+        </div>
+      </Drawer>
+      <Drawer open={openNotification} onClose={toggleNotificationDrawer(false)}>
+        <div
+          className="fm:w-screen"
+          style={{ minWidth: "325px", maxWidth: "400px" }}
+        >
+          <Notificaion
+            closeDrawer={toggleNotificationDrawer(false)}
+          ></Notificaion>
+        </div>
+      </Drawer>
     </div>
   );
 };

@@ -154,7 +154,6 @@ export const resetpassword = createAsyncThunk(
         data
       );
       if (response.status >= 200 && response.status < 300) {
-        console.log(data);
         return response.data;
       } else {
         return thunkAPI.rejectWithValue(await response.data);

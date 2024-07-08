@@ -5,33 +5,60 @@ import { authAction, useSelectorUserState } from "./redux/slices/AuthSlice";
 import { AuthRoutes, NormalRoutes } from "./routes/CustomRoutes";
 import { useEffect } from "react";
 import {
-  Navigate,
   Route,
   Routes,
   useLocation,
   useMatch,
+  useNavigate,
 } from "react-router-dom";
 import { AllRoutes } from "./constants/AllRoutes";
 import ResetPassword from "./pages/forgetpassword/ResetPassword";
+import { userAction } from "./redux/slices/UserActionSlice";
+import { isExpired } from "react-jwt";
+import { setNavigate } from "./helpers/axiousinstance";
 
 function App() {
-  const { isLoggedIn } = useSelectorUserState();
   const dispatch = useDispatch();
-  const location = useLocation();
+  const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   if (!isLoggedIn) return;
-  //   dispatch(authAction.setuser());
-  // }, [dispatch, isLoggedIn]);
+  useEffect(() => {
+    setNavigate(dispatch);
+  }, [dispatch]);
+
+  const { isLoggedIn } = useSelectorUserState();
+  const token = localStorage.getItem("token");
+  if (!!token) {
+    if (isExpired(token)) {
+      dispatch(authAction.logout());
+    }
+  }
+  const location = useLocation();
   const isResetPasswordRoute = useMatch(AllRoutes.ResetPassword);
-  console.log(isResetPasswordRoute);
   useEffect(() => {
     dispatch(authAction.resetErrors());
-  }, [location.pathname]);
+    dispatch(userAction.resetProfileUpdateFlag());
+    dispatch(userAction.resetErrors());
+    dispatch(userAction.resetNotification());
+  }, [location.pathname, dispatch]);
 
   return (
     <>
-      {!isLoggedIn ? (
+      {isResetPasswordRoute ? (
+        <Routes>
+          <Route path={AllRoutes.ResetPassword} element={<ResetPassword />} />
+        </Routes>
+      ) : (
+        <>
+          {!isLoggedIn ? (
+            <AuthRoutes />
+          ) : (
+            <SideBottomBar>
+              <NormalRoutes />
+            </SideBottomBar>
+          )}
+        </>
+      )}
+      {/* {!isLoggedIn ? (
         <AuthRoutes />
       ) : (
         <>
@@ -44,7 +71,7 @@ function App() {
             </SideBottomBar>
           )}
         </>
-      )}
+      )} */}
     </>
   );
 }

@@ -73,6 +73,7 @@ const EditProfile = () => {
 
   useEffect(() => {
     if (!Object.keys(user).length > 0) {
+      console.log("trye");
       dispatch(getuserdata(userid));
     }
     if (Object.keys(user).length > 0) {
@@ -116,7 +117,7 @@ const EditProfile = () => {
         Swal.fire({
           position: "top-end",
           icon: "error",
-          title: "Some Issue By server",
+          title: res.payload.data[0].message,
           showConfirmButton: false,
           timer: 1500,
         });
@@ -128,7 +129,6 @@ const EditProfile = () => {
 
   const handledelete = async () => {
     const formData = new FormData();
-    // formData.append("UserId", userid);
     formData.append("ProfilePhoto", null);
     const res = await dispatch(changeuserphoto(formData));
     if (res.payload.isSuccess) {

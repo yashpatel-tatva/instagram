@@ -85,7 +85,6 @@ const useractionSlice = createSlice({
         state.isError = true;
         state.success = false;
         state.ErrorMessageArray = actions.payload.data;
-        console.log(state.isError, state.ErrorMessage);
       })
       .addCase(updateuserprofile.pending, (state, actions) => {
         state.isError = false;

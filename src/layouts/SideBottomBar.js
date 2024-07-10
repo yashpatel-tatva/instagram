@@ -66,6 +66,7 @@ const SideBottomBar = ({ children }) => {
   const [openSearch, setOpenSearch] = React.useState(false);
 
   const toggleSearchDrawer = (newOpen) => () => {
+    console.log(newOpen);
     if (newOpen) setOpenNotification(false);
     setOpenSearch(newOpen);
   };
@@ -344,7 +345,7 @@ const SideBottomBar = ({ children }) => {
       </div>
       <Drawer open={openSearch} onClose={toggleSearchDrawer(false)}>
         <div
-          className="fm:w-screen"
+          className="fm:w-screen h-screen"
           style={{ minWidth: "325px", maxWidth: "400px" }}
         >
           <Search closeDrawer={toggleSearchDrawer(false)}></Search>
@@ -352,7 +353,7 @@ const SideBottomBar = ({ children }) => {
       </Drawer>
       <Drawer open={openNotification} onClose={toggleNotificationDrawer(false)}>
         <div
-          className="fm:w-screen"
+          className="fm:w-screen h-screen"
           style={{ minWidth: "325px", maxWidth: "400px" }}
         >
           <Notificaion

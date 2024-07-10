@@ -14,13 +14,13 @@ import {
   createpost,
   useSelectorUserAction,
 } from "../../redux/slices/UserActionSlice";
-import Avatar from "@mui/material/Avatar";
 import PlaceIcon from "@mui/icons-material/Place";
 import "./CaptionAndConfirm.css";
 import { useDispatch } from "react-redux";
 import { LoadingButton } from "@mui/lab";
 import { useNavigate } from "react-router-dom";
 import { AllRoutes } from "../../constants/AllRoutes";
+import AvtarUser from "../avtarofuser/AvtarUser";
 
 const CaptionAndConfirm = (data) => {
   const { user, loading, userPhoto } = useSelectorUserAction();
@@ -156,7 +156,7 @@ const CaptionAndConfirm = (data) => {
           </div>
           <div className="w-1/2 fm:w-full  h-full fm:h-1/2 p-4">
             <div className="flex gap-4 items-center">
-              <Avatar alt="profile" src={userPhoto} />{" "}
+              <AvtarUser userId={user.userId} alt="profile" src={userPhoto} />
               <span className="font-semibold">{user.userName}</span>
             </div>
             <div className="w-10/12 py-6">

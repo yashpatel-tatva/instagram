@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import CloseIcon from "@mui/icons-material/Close";
 import { authAction, useSelectorUserState } from "../../redux/slices/AuthSlice";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import {
+  folloerorfollowinglist,
   followrequest,
   getPostOrReel,
   getmediafromname,
   getotheruserdata,
+  getpffcountofother,
+  getpostfollowerfollowingcount,
   getuserdata,
   searchbyusername,
   useSelectorUserAction,
@@ -14,7 +19,18 @@ import {
 import SettingsIcon from "@mui/icons-material/Settings";
 import ProfileLoader from "../../components/loaders/ProfileLoader";
 import { Stack } from "@mui/system";
-import { Box, Button, Menu, MenuItem, Tab, Tabs } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  Modal,
+  Snackbar,
+  Tab,
+  Tabs,
+} from "@mui/material";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AllRoutes } from "../../constants/AllRoutes";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
@@ -27,6 +43,8 @@ import ViewDayIcon from "@mui/icons-material/ViewDay";
 import MovieFilterIcon from "@mui/icons-material/MovieFilter";
 import PostContainer from "../../components/postcontainer/PostContainer";
 import "../profile/Profile.css";
+import AvtarUserwithName from "../../components/avtarofuser/AvtarUserwithName";
+import QRCode from "react-qr-code";
 
 const Profile = () => {
   const { userName } = useParams();
@@ -34,13 +52,28 @@ const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { userid } = useSelectorUserState();
-  const { user, loading, userPhoto } = useSelectorUserAction();
+  const { user, userPhoto } = useSelectorUserAction();
+
+  useEffect(() => {
+    if (userName === user.userName) {
+      navigate(AllRoutes.UserProfile);
+    }
+  }, [navigate, user.userName, userName]);
 
   const [postList, setPostList] = useState();
   const [showMedia, setShowMedia] = useState();
   const [imgList, setImgList] = useState([]);
 
   const [showProfileOf, setShowProfileOf] = useState();
+  const [showCounts, setShowCounts] = useState({
+    followingCount: 0,
+    followeCount: 0,
+    postCount: 0,
+  });
+
+  useEffect(() => {
+    console.log(showProfileOf);
+  }, []);
 
   useEffect(() => {
     dispatch(userAction.resetProfileUpdateFlag());
@@ -59,11 +92,18 @@ const Profile = () => {
           const id = res.payload.data.record[0].userId;
           const userdata = await dispatch(getotheruserdata(id));
           setShowProfileOf(userdata.payload);
+          const counts = await dispatch(getpffcountofother(id));
+          setShowCounts(counts.payload.data);
         }
       };
       fetch();
     } else {
       setShowProfileOf(user);
+      const fetch = async () => {
+        const counts = await dispatch(getpffcountofother(userid));
+        setShowCounts(counts.payload.data);
+      };
+      fetch();
     }
   }, [dispatch, userName, user, userid]);
 
@@ -169,15 +209,69 @@ const Profile = () => {
       fromUserId: userid,
       toUserId: showProfileOf.userId,
     };
-    const res = await dispatch(followrequest(data));
-    if (res.payload.isSuccess) {
-      if (userName) {
-        const userdata = await dispatch(getotheruserdata(showProfileOf.userId));
-        setShowProfileOf(userdata.payload);
-      }
-    }
+    await dispatch(followrequest(data));
     setLoadrt(false);
+    const res = await dispatch(getpffcountofother(showProfileOf.userId));
+    dispatch(getpostfollowerfollowingcount(userid));
+    setShowCounts(res.payload.data);
+    if (userName) {
+      const userdata = await dispatch(getotheruserdata(showProfileOf.userId));
+      setShowProfileOf(userdata.payload);
+    } else {
+      dispatch(getuserdata(showProfileOf.userId));
+    }
   }
+
+  ///////////////////follower/////////////////////
+  const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    boxShadow: 24,
+    padding: "0px 5px 5px 5px",
+  };
+
+  const [openListModal, setOpenListModal] = React.useState(false);
+  const [listShow, setListShow] = useState();
+  const [listName, setListName] = useState();
+  const handleListOpen = async (value) => {
+    if (!userName || !showProfileOf.isPrivate || showProfileOf.isFollowing) {
+      setListName(value);
+      const payload = {
+        pageNumber: 1,
+        pageSize: 110,
+        searchName: "",
+        model: {
+          userId: showProfileOf.userId,
+          followerOrFollowing: value,
+        },
+      };
+      const res = await dispatch(folloerorfollowinglist(payload));
+      setListShow(res.payload.data.record);
+      setOpenListModal(true);
+    }
+  };
+  const handleClose = () => {
+    setOpenListModal(false);
+    setOpenQR(false);
+  };
+
+  const [openQR, setOpenQR] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  function hadleQROpen() {
+    setOpenQR(true);
+  }
+  const handleCopyClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setCopied(false);
+  };
 
   return (
     <div className="">
@@ -216,19 +310,21 @@ const Profile = () => {
                         disabled={loader}
                         onClick={handleFollowClick}
                         size="small"
-                        // style={{
-                        //   backgroundColor: `${
-                        //     showProfileOf.isFollowing
-                        //       ? "#e6e6e1"
-                        //       : showProfileOf.isFollower
-                        //       ? "#1976d2"
-                        //       : "#1976d2"
-                        //   }`,
-                        //   color: `${
-                        //     showProfileOf.isFollowing ? "Black" : "white"
-                        //   }`,
-                        //   fontSize: "small",
-                        // }}
+                        sx={{
+                          backgroundColor: `${
+                            showProfileOf.isFollowing || showProfileOf.isRequest
+                              ? "#e6e6e1"
+                              : showProfileOf.isFollower
+                              ? "#1976d2"
+                              : "#1976d2"
+                          }`,
+                          color: `${
+                            showProfileOf.isFollowing || showProfileOf.isRequest
+                              ? "Black"
+                              : "white"
+                          }`,
+                          fontSize: "small",
+                        }}
                       >
                         {showProfileOf.isFollowing ? (
                           <>Following</>
@@ -262,6 +358,7 @@ const Profile = () => {
                           color: "black",
                           fontSize: "small",
                         }}
+                        onClick={hadleQROpen}
                       >
                         Share Profile
                       </Button>
@@ -285,9 +382,19 @@ const Profile = () => {
               </div>
               <div>
                 <Stack spacing={4} direction={"row"} alignItems={"center"}>
-                  <span>{showProfileOf.postCount} Posts</span>
-                  <span>{showProfileOf.followeCount} Followers</span>
-                  <span>{showProfileOf.followingCount} Following</span>
+                  <span>{showCounts.postCount} Posts</span>
+                  <span
+                    role="button"
+                    onClick={() => handleListOpen("Follower")}
+                  >
+                    {showCounts.followeCount} Followers
+                  </span>
+                  <span
+                    role="button"
+                    onClick={() => handleListOpen("Following")}
+                  >
+                    {showCounts.followingCount} Following
+                  </span>
                 </Stack>
               </div>
               <div>
@@ -344,16 +451,38 @@ const Profile = () => {
                 <div className="">
                   <div className="flex gap-1 items-center">
                     {userName ? (
-                      <Button
+                      <LoadingButton
+                        loading={loader}
+                        variant="contained"
+                        disabled={loader}
+                        onClick={handleFollowClick}
                         size="small"
-                        style={{
-                          backgroundColor: "#e6e6e1",
-                          color: "black",
+                        sx={{
+                          backgroundColor: `${
+                            showProfileOf.isFollowing || showProfileOf.isRequest
+                              ? "#e6e6e1"
+                              : showProfileOf.isFollower
+                              ? "#1976d2"
+                              : "#1976d2"
+                          }`,
+                          color: `${
+                            showProfileOf.isFollowing || showProfileOf.isRequest
+                              ? "Black"
+                              : "white"
+                          }`,
                           fontSize: "small",
                         }}
                       >
-                        FollowUnFollow
-                      </Button>
+                        {showProfileOf.isFollowing ? (
+                          <>Following</>
+                        ) : showProfileOf.isFollower ? (
+                          <>Follow Back</>
+                        ) : showProfileOf.isRequest ? (
+                          <>Requested</>
+                        ) : (
+                          <>Follow</>
+                        )}
+                      </LoadingButton>
                     ) : (
                       <Link to={AllRoutes.EditProfile}>
                         <Button
@@ -375,6 +504,7 @@ const Profile = () => {
                           backgroundColor: "#e6e6e1",
                           color: "black",
                         }}
+                        onClick={hadleQROpen}
                       >
                         Share Profile
                       </button>
@@ -395,15 +525,23 @@ const Profile = () => {
             <div className="border-t-2 border-b-2 py-2 my-2">
               <Stack direction={"row"} justifyContent={"space-around"}>
                 <div className="text-center">
-                  <div>{showProfileOf.postCount}</div>
+                  <div>{showCounts.postCount}</div>
                   <div>Posts</div>
                 </div>
-                <div className="text-center">
-                  <div>{showProfileOf.followeCount}</div>
+                <div
+                  className="text-center"
+                  role="button"
+                  onClick={() => handleListOpen("Follower")}
+                >
+                  <div>{showCounts.followeCount}</div>
                   <div>Followers</div>
                 </div>
-                <div className="text-center">
-                  <div>{showProfileOf.followingCount}</div>
+                <div
+                  className="text-center"
+                  role="button"
+                  onClick={() => handleListOpen("Following")}
+                >
+                  <div>{showCounts.followingCount}</div>
                   <div>Following</div>
                 </div>
               </Stack>
@@ -476,7 +614,11 @@ const Profile = () => {
                       postList.map((post) => (
                         <PostContainer
                           key={post.postId}
-                          data={post}
+                          postdata={post}
+                          postProfilePhoto={
+                            userName ? showProfileOf.profilePic : userPhoto
+                          }
+                          postUserName={showProfileOf.userName}
                         ></PostContainer>
                       ))}
                   </>
@@ -488,6 +630,90 @@ const Profile = () => {
           )}
         </>
       )}
+
+      {showProfileOf && (
+        <Modal open={openQR} onClose={handleClose}>
+          <Box
+            sx={style}
+            className="rounded flex flex-col gap-5 p-5 justify-center items-center"
+          >
+            <QRCode
+              style={{ padding: "10px" }}
+              value={
+                window.location.origin +
+                "/userprofile/" +
+                showProfileOf.userName
+              }
+            ></QRCode>
+            <div>
+              <CopyToClipboard
+                text={
+                  window.location.origin +
+                  "/userprofile/" +
+                  showProfileOf.userName
+                }
+                onCopy={() => setCopied(true)}
+              >
+                <div className="flex border-2 items-center">
+                  <span>
+                    {window.location.origin +
+                      "/userprofile/" +
+                      showProfileOf.userName}
+                  </span>
+                  <IconButton>
+                    <ContentCopyIcon />
+                  </IconButton>
+                </div>
+              </CopyToClipboard>
+            </div>
+          </Box>
+        </Modal>
+      )}
+
+      <Snackbar
+        style={{
+          width: "fit-contain",
+          backgroundColor: "white",
+          color: "black",
+        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        open={copied}
+        autoHideDuration={1000}
+        onClose={handleCopyClose}
+        message="Copied"
+      />
+      <Modal open={openListModal} onClose={handleClose}>
+        <Box sx={style} className="rounded">
+          <div className="flex justify-between border-b-2 items-center w-full font-semibold">
+            <span></span>
+            <span>{listName}</span>
+            <IconButton onClick={handleClose}>
+              {" "}
+              <CloseIcon />
+            </IconButton>
+          </div>
+          {listShow && listShow.length > 0 ? (
+            <div
+              className="overflow-scroll flex flex-col gap-3"
+              style={{ maxHeight: "50vh" }}
+            >
+              {listShow.map((element) => {
+                return (
+                  <div className="flex justify-between" key={element.userId}>
+                    <AvtarUserwithName
+                      data={element}
+                      key={element.userId}
+                      onClick={handleClose}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <>Not Any</>
+          )}
+        </Box>
+      </Modal>
     </div>
   );
 };

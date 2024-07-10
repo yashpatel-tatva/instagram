@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { AllRoutes } from "../constants/AllRoutes";
 import { SignUp } from "../pages/signup/Signup";
 import { Login } from "../pages/login/Login";
@@ -23,6 +23,11 @@ export const AuthRoutes = () => {
   );
 };
 
+const OtherProfileWrapper = () => {
+  const { userName } = useParams();
+  return <Profile key={userName} />;
+};
+
 export const NormalRoutes = () => {
   return (
     <Routes>
@@ -33,7 +38,7 @@ export const NormalRoutes = () => {
       <Route path={AllRoutes.UserProfile} element={<Profile />} />
       <Route path={AllRoutes.Messages} element={<Messages />} />
       <Route path={AllRoutes.EditProfile} element={<EditProfile />} />
-      <Route path={AllRoutes.OtherProfile} element={<Profile />} />
+      <Route path={AllRoutes.OtherProfile} element={<OtherProfileWrapper />} />
     </Routes>
   );
 };

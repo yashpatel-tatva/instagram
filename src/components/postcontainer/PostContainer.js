@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { assets } from "../../constants/Assets";
+import "./PostContainer.css";
+import CloseIcon from "@mui/icons-material/Close";
 import {
-  Avatar,
   Box,
   IconButton,
-  InputAdornment,
+  Menu,
+  MenuItem,
+  Modal,
   Stack,
   TextField,
 } from "@mui/material";
@@ -12,22 +15,24 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import EllipsisTextUptoTwo from "../ellipsisTextTwoline/EllipsisTextUptoTwo";
 import {
   commentonpost,
+  deletepost,
   getmediafromname,
+  getpostbyid,
+  getpostfollowerfollowingcount,
   likeunlikepost,
-  userAction,
   useSelectorUserAction,
 } from "../../redux/slices/UserActionSlice";
 import { useDispatch } from "react-redux";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import SendIcon from "@mui/icons-material/Send";
+import AvtarUser from "../avtarofuser/AvtarUser";
+import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
+import AvtarUserwithName from "../avtarofuser/AvtarUserwithName";
 
-const PostContainer = ({ data }) => {
+const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
   const dispatch = useDispatch();
-
-  const { user, updaterender, userPhoto } = useSelectorUserAction();
-  const [postUserName, setPostUserName] = useState();
-  const [postProfilePhoto, setPostProfilePhoto] = useState();
+  const [data, setData] = useState(postdata);
+  const { user, updaterender } = useSelectorUserAction();
   const [mediaName, setMediaName] = useState();
   const [imgList, setImgList] = useState();
   const [isLike, setIsLike] = useState(
@@ -36,13 +41,6 @@ const PostContainer = ({ data }) => {
   const [likeCount, setLikeCount] = useState(data.postLikes.length);
 
   useEffect(() => {
-    if (data.userId !== user.userId) {
-      // call for getting userID
-      // then set there photo and username from that
-    } else {
-      setPostUserName(user.userName);
-      setPostProfilePhoto(userPhoto);
-    }
     let medialist = [];
     data.medias.map((media) =>
       medialist.push({ userId: data.userId, postName: media.mediaName })
@@ -93,16 +91,24 @@ const PostContainer = ({ data }) => {
     }
   }
 
+  const [isDeleted, setIsDeleted] = useState(false);
+
+  async function handleDeletePost() {
+    setIsDeleted(true);
+    const res = await dispatch(deletepost(data.postId));
+    dispatch(getpostfollowerfollowingcount(data.userId));
+  }
+
   async function handleLike() {
-    !isLike ? setLikeCount((n) => n + 1) : setLikeCount((n) => n - 1);
-    setIsLike(!isLike);
+    // !isLike ? setLikeCount((n) => n + 1) : setLikeCount((n) => n - 1);
+    // setIsLike(!isLike);
     const payload = {
       userId: user.userId,
       postId: data.postId,
       isLike: !isLike,
     };
-    const res = await dispatch(likeunlikepost(payload));
-    await dispatch(userAction.updaterender());
+    await dispatch(likeunlikepost(payload));
+    await renderPost();
   }
   const commentBox = useRef();
 
@@ -132,23 +138,73 @@ const PostContainer = ({ data }) => {
   }
 
   async function handleCommentSend() {
-    const payload = {
-      userId: user.userId,
-      postId: data.postId,
-      commentText: commentBox.current.value,
-    };
-    const res = await dispatch(commentonpost(payload));
-    await dispatch(userAction.updaterender());
+    if (
+      commentBox.current.value !== null &&
+      commentBox.current.value.trim() !== ""
+    ) {
+      const payload = {
+        userId: user.userId,
+        postId: data.postId,
+        commentText: commentBox.current.value,
+      };
+      await dispatch(commentonpost(payload));
+      commentBox.current.value = "";
+      setDynamicInputProps({});
+      await renderPost();
+    }
   }
 
-  function openComment() {
-    console.log(data.postComments);
+  async function renderPost() {
+    const res = await dispatch(
+      getpostbyid({ postType: "Post", postId: data.postId })
+    );
+    setData(res.payload.data);
+    setIsLike(
+      !!res.payload.data.postLikes.find(
+        (element) => element.userId === user.userId
+      )
+    );
+    setLikeCount(res.payload.data.postLikes.length);
   }
 
+  /// comments section
+
+  const [openComment, setopenComment] = useState(false);
+
+  function openCommentsection() {
+    setopenComment(!openComment);
+  }
+
+  //like section
+
+  const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    boxShadow: 24,
+    padding: "0px 5px 5px 5px",
+  };
+
+  const [openListModal, setOpenListModal] = React.useState(false);
+  const [listShow, setListShow] = useState();
+  const [listName, setListName] = useState();
+  const handleListOpen = async (value) => {
+    setListName(value);
+    setListShow(data.postLikes);
+    setOpenListModal(true);
+  };
+  const handleClose = () => setOpenListModal(false);
+
+  if (isDeleted) {
+    return null; // Do not render if deleted
+  }
   return (
     <div
       value={updaterender}
-      className="w-6/12 md:w-9/12 fm:w-full border-b-2 fnm:border-0"
+      className="w-6/12 fnm:relative md:w-9/12 fm:w-full border-b-2 fnm:border-0"
     >
       <div className="flex justify-between items-center">
         <div className="flex gap-3 items-center">
@@ -157,14 +213,30 @@ const PostContainer = ({ data }) => {
             className="flex gap-2 items-center py-2"
             style={{ width: "fit-content" }}
           >
-            <Avatar src={postProfilePhoto} alt="" />{" "}
+            <AvtarUser userId={data.userId} src={postProfilePhoto} alt="" />{" "}
           </div>
           <div className="font-semibold">{postUserName}</div>
         </div>
         <div>
-          <IconButton>
-            <MoreHorizIcon />
-          </IconButton>
+          {postUserName === user.userName && (
+            <PopupState variant="popover" popupId="setting">
+              {(popupState) => (
+                <React.Fragment>
+                  <IconButton variant="contained" {...bindTrigger(popupState)}>
+                    <MoreHorizIcon />
+                  </IconButton>
+                  <Menu {...bindMenu(popupState)}>
+                    <MenuItem
+                      className="text-red-500"
+                      onClick={handleDeletePost}
+                    >
+                      Delete
+                    </MenuItem>
+                  </Menu>
+                </React.Fragment>
+              )}
+            </PopupState>
+          )}
         </div>
       </div>
       <div className="relative">
@@ -202,6 +274,7 @@ const PostContainer = ({ data }) => {
         <div>
           {imgList && imgList.length !== 0 && (
             <img
+              onDoubleClick={handleLike}
               src={imgList[index].src}
               className="rounded"
               style={{ width: "100%" }}
@@ -219,7 +292,7 @@ const PostContainer = ({ data }) => {
               width={"30px"}
             ></img>
           </IconButton>
-          <IconButton onClick={openComment}>
+          <IconButton onClick={openCommentsection}>
             <img src={assets.commentIcon} alt="like" width={"30px"}></img>
           </IconButton>
           <IconButton>
@@ -230,33 +303,107 @@ const PostContainer = ({ data }) => {
           <img src={assets.bookmarkIcon} alt="like" width={"30px"}></img>
         </IconButton>
       </div>
-      <div>
-        <span>{likeCount} likes</span>
+      <div role="button">
+        <span onClick={() => handleListOpen("Likes")}>{likeCount} likes</span>
       </div>
       <div>
         <span>{postUserName}</span>
         <EllipsisTextUptoTwo text={data.caption}></EllipsisTextUptoTwo>
       </div>
       <div className="my-2">
-        {data.postComments.length > 2 && (
-          <span role="button" onClick={openComment}>
+        {data.postComments.length > 0 && (
+          <span role="button" onClick={openCommentsection}>
             View all {data.postComments.length} comments
           </span>
         )}
       </div>
-      <div className="my-2">
-        <TextField
-          onChange={handleCommentChange}
-          inputRef={commentBox}
-          {...dynamicInputProps}
-          fullWidth
-          id="standard-multiline-flexible"
-          label="Add a comment"
-          multiline
-          maxRows={4}
-          variant="standard"
-        />
+      <div
+        className={`${
+          openComment ? "block" : "hidden"
+        } h-full bg-white flex flex-col  border-2 border-t rounded-t-lg rounded-r-lg absolute commentbox`}
+      >
+        <div className="w-full flex justify-between items-center border-b-2">
+          <span></span>
+          <span>Comments</span>
+          <IconButton onClick={openCommentsection}>
+            <CloseIcon />
+          </IconButton>
+        </div>
+        <div className="overflow-scroll h-full">
+          {data.postComments && data.postComments.length > 0 ? (
+            <>
+              {data.postComments.map((element) => {
+                return (
+                  <AvtarUserwithName
+                    key={element.commentId}
+                    data={{
+                      userName: element.userName,
+                      userId: element.userId,
+                      profilePictureName: element.avtar,
+                    }}
+                    comment={element.commentText}
+                  ></AvtarUserwithName>
+                );
+              })}
+            </>
+          ) : (
+            <div className="flex h-full justify-center items-center">
+              No Comments Yet, Add Your
+            </div>
+          )}
+        </div>
+        <div className=" bottom-0 absolute w-full bg-white">
+          <TextField
+            onChange={handleCommentChange}
+            inputRef={commentBox}
+            {...dynamicInputProps}
+            fullWidth
+            id="standard-multiline-flexible"
+            label="Add a comment"
+            multiline
+            maxRows={4}
+            variant="standard"
+          />
+        </div>
       </div>
+
+      <Modal open={openListModal} onClose={handleClose}>
+        <Box sx={style} className="rounded">
+          <div className="flex justify-between border-b-2 items-center w-full font-semibold">
+            <span></span>
+            <span>{listName}</span>
+            <IconButton onClick={handleClose}>
+              {" "}
+              <CloseIcon />
+            </IconButton>
+          </div>
+
+          {listShow && listShow.length > 0 ? (
+            <div
+              className="overflow-scroll flex flex-col gap-3"
+              style={{ maxHeight: "50vh" }}
+            >
+              {listShow.map((element) => {
+                return (
+                  <div className="flex justify-between" key={element.userId}>
+                    <AvtarUserwithName
+                      data={{
+                        userName: element.userName,
+                        userId: element.userId,
+                        profilePictureName: element.avtar,
+                      }}
+                      key={element.userId}
+                      onClick={handleClose}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <>Not Any</>
+          )}
+        </Box>
+      </Modal>
     </div>
   );
 };

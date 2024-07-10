@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   changeuserphoto,
   deleteprofilephoto,
@@ -28,15 +28,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 
 const EditProfile = () => {
   const { userid } = useSelectorUserState();
-  const {
-    user,
-    userPhoto,
-    success,
-    isError,
-    ErrorMessageArray,
-    Notification,
-    isProfileUpdated,
-  } = useSelectorUserAction();
+  const { user, userPhoto, ErrorMessageArray, isProfileUpdated } =
+    useSelectorUserAction();
   const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
@@ -87,6 +80,7 @@ const EditProfile = () => {
         dateOfBirth: user.dateOfBirth || "",
         bio: user.bio || "",
         link: user.link || "",
+        isPrivate: user.isPrivate,
       });
       setLoading(false);
     }
@@ -99,9 +93,17 @@ const EditProfile = () => {
     }
   }, [isProfileUpdated]);
 
+  const fileInputRef = useRef(null);
+
+  const handleFileRemove = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Clear the file input value
+    }
+  };
+
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
-    if (file && allowedTypes.includes(file.type)) {
+    if (file && allowedTypes.includes(file.type) && file.size < 1024000) {
       const formData = new FormData();
       // formData.append("UserId", userid);
       formData.append("ProfilePhoto", file);
@@ -122,6 +124,8 @@ const EditProfile = () => {
           timer: 1500,
         });
       }
+    } else if (file.size > 1024000) {
+      Swal.fire("Please select a file with less than 1MB.");
     } else {
       Swal.fire("Please select a valid JPG or PNG file.");
     }
@@ -210,9 +214,13 @@ const EditProfile = () => {
       dateOfBirth: user.dateOfBirth || "",
       bio: user.bio || "",
       link: user.link || "",
+      isPrivate: user.isPrivate,
     },
     validate,
     onSubmit: (values) => {
+      values.isPrivate =
+        values.isPrivate === "true" || values.isPrivate === true;
+      console.log(values);
       dispatch(updateuserprofile(JSON.stringify(values, null, 2)));
     },
   });
@@ -268,6 +276,8 @@ const EditProfile = () => {
                     <input
                       hidden
                       type="file"
+                      ref={fileInputRef}
+                      onClick={handleFileRemove}
                       onChange={handleFileChange}
                     ></input>
                     Change Photo
@@ -487,6 +497,30 @@ const EditProfile = () => {
                     {formik.errors.link && formik.touched.link && (
                       <div className="text-red-500">{formik.errors.link}</div>
                     )}
+                  </div>
+                </Grid>
+                <Grid item sm={6} xs={12}>
+                  <div className="mt-3">
+                    <div
+                      className={`${styles.formGroup} flex items-center rounded`}
+                    >
+                      <select
+                        type="text"
+                        name="isPrivate"
+                        onChange={(e) => {
+                          formik.handleChange(e);
+                          handleChange(e);
+                        }}
+                        onBlur={formik.handleBlur}
+                        value={formik.values.isPrivate}
+                        className={styles.formControl}
+                        placeholder=""
+                      >
+                        <option value="true">Private Account</option>
+                        <option value="false">Public Account</option>
+                      </select>
+                      <span>isPrivate</span>
+                    </div>
                   </div>
                 </Grid>
               </Grid>

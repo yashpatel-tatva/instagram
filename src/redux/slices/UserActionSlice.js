@@ -6,6 +6,7 @@ import { assets } from "../../constants/Assets";
 
 const initialState = {
   user: {},
+  pffcount: {},
   Notification: "",
   ErrorMessage: "",
   isError: false,
@@ -14,6 +15,9 @@ const initialState = {
   userPhoto: assets.profiledefault,
   updaterender: false,
   // searchedUser: {},
+  NotificationList: null,
+  stories: {},
+  personalstories: {},
 };
 
 const useractionSlice = createSlice({
@@ -91,7 +95,7 @@ const useractionSlice = createSlice({
         state.isError = false;
         state.success = true;
         state.Notification = actions.payload.message;
-        state.user = actions.payload.data;
+        state.user = { ...state.user, ...actions.payload.data };
         state.isProfileUpdated = true;
       })
       .addCase(updateuserprofile.rejected, (state, actions) => {
@@ -109,6 +113,9 @@ const useractionSlice = createSlice({
         state.loading = false;
         state.Notification = actions.payload.message;
       })
+      .addCase(getpostfollowerfollowingcount.fulfilled, (state, actions) => {
+        state.pffcount = { ...actions.payload.data };
+      })
       .addCase(createpost.rejected, (state, actions) => {
         state.loading = false;
         state.isError = true;
@@ -125,6 +132,18 @@ const useractionSlice = createSlice({
         state.success = true;
         state.loading = false;
         state.Notification = actions.payload.message;
+      })
+      .addCase(storylisttoshow.fulfilled, (state, actions) => {
+        state.isError = false;
+        state.success = true;
+        state.loading = false;
+        state.stories = actions.payload.data;
+      })
+      .addCase(personalstorylist.fulfilled, (state, actions) => {
+        state.isError = false;
+        state.success = true;
+        state.loading = false;
+        state.personalstories = actions.payload.data;
       })
       .addCase(addstory.rejected, (state, actions) => {
         state.loading = false;
@@ -156,22 +175,17 @@ export const getuserdata = createAsyncThunk(
       const response = await axiosInstance.get(
         `/User/GetUserById?userId=${userId}`
       );
-      const countres = await axiosInstance.get(
-        `/User/FollowerAndFollowingAndPostCountById/${userId}`
-      );
-      if (
-        response.status >= 200 &&
-        response.status < 300 &&
-        countres.status >= 200 &&
-        countres.status < 300
-      ) {
+      if (response.status >= 200 && response.status < 300) {
         await thunkAPI.dispatch(
           getuserphoto({
             userId: response.data.data.userId,
             photoName: response.data.data.profilePictureName,
           })
         );
-        return { ...(await response.data.data), ...(await countres.data.data) };
+        await thunkAPI.dispatch(
+          getpostfollowerfollowingcount(response.data.data.userId)
+        );
+        return { ...(await response.data.data) };
       } else {
         return thunkAPI.rejectWithValue(await response.data);
       }
@@ -191,15 +205,7 @@ export const getotheruserdata = createAsyncThunk(
       const response = await axiosInstance.get(
         `/User/GetUserById?userId=${userId}`
       );
-      const countres = await axiosInstance.get(
-        `/User/FollowerAndFollowingAndPostCountById/${userId}`
-      );
-      if (
-        response.status >= 200 &&
-        response.status < 300 &&
-        countres.status >= 200 &&
-        countres.status < 300
-      ) {
+      if (response.status >= 200 && response.status < 300) {
         const photo = await thunkAPI.dispatch(
           getprofilepic({
             userId: response.data.data.userId,
@@ -208,7 +214,6 @@ export const getotheruserdata = createAsyncThunk(
         );
         return {
           ...(await response.data.data),
-          ...(await countres.data.data),
           profilePic: photo.payload,
         };
       } else {
@@ -229,6 +234,24 @@ export const deleteprofilephoto = createAsyncThunk(
   async () => {
     const response = await axiosInstance.post("/User/DeleteProfilePhoto");
     return response.data;
+  }
+);
+export const getpostfollowerfollowingcount = createAsyncThunk(
+  "user/getpostfollowerfollowingcount",
+  async (userId) => {
+    const countres = await axiosInstance.get(
+      `/User/FollowerAndFollowingAndPostCountById/${userId}`
+    );
+    return countres.data;
+  }
+);
+export const getpffcountofother = createAsyncThunk(
+  "user/getpffcountofother",
+  async (userId) => {
+    const countres = await axiosInstance.get(
+      `/User/FollowerAndFollowingAndPostCountById/${userId}`
+    );
+    return countres.data;
   }
 );
 
@@ -561,6 +584,166 @@ export const requestacceptorcancel = createAsyncThunk(
     try {
       const response = await axiosInstance.post(
         `/User/RequestAcceptOrCancel?requestId=${data.requestId}&accpetType=${data.accpetType}`
+      );
+      if (response.status >= 200 && response.status < 300) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(await response.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        return thunkAPI.rejectWithValue(error.response.data);
+      } else {
+        return thunkAPI.rejectWithValue({ message: error.message });
+      }
+    }
+  }
+);
+export const getpostbyid = createAsyncThunk(
+  "user/postId",
+  async (data, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post(
+        `/Post/GetPostById?postType=${data.postType}`,
+        data.postId,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.status >= 200 && response.status < 300) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(await response.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        return thunkAPI.rejectWithValue(error.response.data);
+      } else {
+        return thunkAPI.rejectWithValue({ message: error.message });
+      }
+    }
+  }
+);
+export const folloerorfollowinglist = createAsyncThunk(
+  "user/folloerorfollowinglist",
+  async (data, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post(
+        "/User/FollowerORFollowingListById",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.status >= 200 && response.status < 300) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(await response.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        return thunkAPI.rejectWithValue(error.response.data);
+      } else {
+        return thunkAPI.rejectWithValue({ message: error.message });
+      }
+    }
+  }
+);
+export const deletepost = createAsyncThunk(
+  "user/deletepost",
+  async (data, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post(
+        `Post/DeletePost?postId=${data}`
+      );
+      if (response.status >= 200 && response.status < 300) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(await response.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        return thunkAPI.rejectWithValue(error.response.data);
+      } else {
+        return thunkAPI.rejectWithValue({ message: error.message });
+      }
+    }
+  }
+);
+
+export const notificationlist = createAsyncThunk(
+  "notification/notificationlist",
+  async (data, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post(
+        "/Notification/GetNotificationListById",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.status >= 200 && response.status < 300) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(await response.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        return thunkAPI.rejectWithValue(error.response.data);
+      } else {
+        return thunkAPI.rejectWithValue({ message: error.message });
+      }
+    }
+  }
+);
+export const storylisttoshow = createAsyncThunk(
+  "story/storylisttoshow",
+  async (data, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post(
+        "/Story/StoryListByUserId",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.status >= 200 && response.status < 300) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(await response.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        return thunkAPI.rejectWithValue(error.response.data);
+      } else {
+        return thunkAPI.rejectWithValue({ message: error.message });
+      }
+    }
+  }
+);
+export const personalstorylist = createAsyncThunk(
+  "story/personalstorylist",
+  async (thunkAPI) => {
+    try {
+      const response = await axiosInstance.post(
+        "/Story/GetStoryListById",
+        {
+          pageNumber: 1,
+          pageSize: 1111110,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
       if (response.status >= 200 && response.status < 300) {
         return response.data;

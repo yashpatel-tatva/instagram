@@ -1,6 +1,5 @@
 import axios from "axios";
 import { isExpired } from "react-jwt";
-import { useNavigate } from "react-router-dom";
 import { authAction } from "../redux/slices/AuthSlice";
 
 // Function to set navigate function
@@ -18,7 +17,7 @@ function logoutUser() {
 
 // Axios instance configuration
 const axiosInstance = axios.create({
-  baseURL: "https://08183c3b31586c3a0057e72ef21ea983.serveo.net/api",
+  baseURL: "https://088f-14-99-103-154.ngrok-free.app/api",
   withCredentials: false,
 });
 

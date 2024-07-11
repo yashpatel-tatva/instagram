@@ -328,10 +328,10 @@ const Profile = () => {
                       >
                         {showProfileOf.isFollowing ? (
                           <>Following</>
-                        ) : showProfileOf.isFollower ? (
-                          <>Follow Back</>
                         ) : showProfileOf.isRequest ? (
                           <>Requested</>
+                        ) : showProfileOf.isFollower ? (
+                          <>Follow Back</>
                         ) : (
                           <>Follow</>
                         )}
@@ -475,10 +475,10 @@ const Profile = () => {
                       >
                         {showProfileOf.isFollowing ? (
                           <>Following</>
-                        ) : showProfileOf.isFollower ? (
-                          <>Follow Back</>
                         ) : showProfileOf.isRequest ? (
                           <>Requested</>
+                        ) : showProfileOf.isFollower ? (
+                          <>Follow Back</>
                         ) : (
                           <>Follow</>
                         )}

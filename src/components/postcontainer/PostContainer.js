@@ -8,6 +8,7 @@ import {
   Menu,
   MenuItem,
   Modal,
+  Skeleton,
   Stack,
   TextField,
 } from "@mui/material";
@@ -35,6 +36,9 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
   const { user, updaterender } = useSelectorUserAction();
   const [mediaName, setMediaName] = useState();
   const [imgList, setImgList] = useState();
+
+  const [loader, setLoader] = useState(true);
+
   const [isLike, setIsLike] = useState(
     !!data.postLikes.find((element) => element.userId === user.userId)
   );
@@ -50,13 +54,13 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
 
   useEffect(() => {
     if (mediaName) {
-      setImgList([]);
-      mediaName.forEach((element) => {
-        const payload = {
-          data: element,
-          type: "Post",
-        };
-        const fetchData = async () => {
+      const fetchAllImages = async () => {
+        setImgList([]);
+        const fetchPromises = mediaName.map(async (element) => {
+          const payload = {
+            data: element,
+            type: "Post",
+          };
           const res = await dispatch(getmediafromname(payload));
           const img = {
             src:
@@ -67,10 +71,15 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
             count: element.count,
             postId: element.postId,
           };
-          setImgList((old) => [...old, img]);
-        };
-        fetchData();
-      });
+          return img;
+        });
+
+        const imgList = await Promise.all(fetchPromises);
+        setImgList(imgList);
+        setLoader(false);
+      };
+
+      fetchAllImages();
     }
   }, [mediaName]);
 
@@ -213,9 +222,16 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
             className="flex gap-2 items-center py-2"
             style={{ width: "fit-content" }}
           >
-            <AvtarUser userId={data.userId} src={postProfilePhoto} alt="" />{" "}
+            <AvtarUserwithName
+              data={{
+                userName: data.userName,
+                userId: data.userId,
+                profilePictureName: data.profilePhotoName,
+              }}
+              comment={data.location ?? " "}
+              alt=""
+            />{" "}
           </div>
-          <div className="font-semibold">{postUserName}</div>
         </div>
         <div>
           {postUserName === user.userName && (
@@ -272,14 +288,26 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
           </div>
         )}
         <div>
-          {imgList && imgList.length !== 0 && (
+          {loader ? (
             <img
-              onDoubleClick={handleLike}
-              src={imgList[index].src}
+              src={
+                "https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif"
+              }
               className="rounded"
               style={{ width: "100%" }}
               alt=""
             ></img>
+          ) : (
+            imgList &&
+            imgList.length !== 0 && (
+              <img
+                onDoubleClick={handleLike}
+                src={imgList[index].src}
+                className="rounded"
+                style={{ width: "100%" }}
+                alt=""
+              ></img>
+            )
           )}
         </div>
       </div>

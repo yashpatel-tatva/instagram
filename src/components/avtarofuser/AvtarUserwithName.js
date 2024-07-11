@@ -4,10 +4,18 @@ import AvtarUser from "./AvtarUser";
 
 const AvtarUserwithName = ({ data, onClick, comment = "" }) => {
   return (
-    <Link to={`/userprofile/${data.userName}`} onClick={onClick}>
-      <div className="flex gap-4 px-4 items-center">
+    <Link
+      to={`/userprofile/${data.userName}`}
+      style={{ display: "flex", width: "fit-content" }}
+      onClick={onClick}
+    >
+      <div className="flex gap-4 px-4 items-center w-fit">
         <div>
-          <AvtarUser userId={data.userId} photoName={data.profilePictureName} />
+          <AvtarUser
+            userId={data.userId}
+            photoName={data.profilePictureName}
+            src={data.src ?? ""}
+          />
         </div>
         <div>
           <div className="text-lg font-semibold">{data.userName}</div>

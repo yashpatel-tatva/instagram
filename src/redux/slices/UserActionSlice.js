@@ -760,6 +760,83 @@ export const personalstorylist = createAsyncThunk(
   }
 );
 
+export const getstorymedia = createAsyncThunk(
+  "file/getstory",
+  async (payload, thunkAPI) => {
+    try {
+      const response = await axiosInstance.get(
+        `/File/Story?userId=${payload.userId}&storyName=${payload.storyName}`
+      );
+      if (response.status >= 200 && response.status < 300) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(await response.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        return thunkAPI.rejectWithValue(error.response.data);
+      } else {
+        return thunkAPI.rejectWithValue({ message: error.message });
+      }
+    }
+  }
+);
+
+export const suggestionlist = createAsyncThunk(
+  "user/getsuggetionlist",
+  async (data, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post(
+        "/User/GetSuggestionList",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.status >= 200 && response.status < 300) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(await response.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        return thunkAPI.rejectWithValue(error.response.data);
+      } else {
+        return thunkAPI.rejectWithValue({ message: error.message });
+      }
+    }
+  }
+);
+export const postfeedlist = createAsyncThunk(
+  "post/postfeedlist",
+  async (data, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post(
+        "/Post/GetPostListByUserId",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.status >= 200 && response.status < 300) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(await response.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        return thunkAPI.rejectWithValue(error.response.data);
+      } else {
+        return thunkAPI.rejectWithValue({ message: error.message });
+      }
+    }
+  }
+);
+
 export const userAction = useractionSlice.actions;
 
 export const useSelectorUserAction = () => {

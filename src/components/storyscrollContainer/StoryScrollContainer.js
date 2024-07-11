@@ -79,7 +79,7 @@ function StoryScrollContainer({ list, onClick }) {
   };
   const dispatch = useDispatch();
   const { userid } = useSelectorUserState();
-  const { stories, user, userPhoto } = useSelectorUserAction();
+  const { stories, user } = useSelectorUserAction();
   useEffect(() => {
     if (!Object.keys(stories).length > 0) {
       const data = {
@@ -94,29 +94,49 @@ function StoryScrollContainer({ list, onClick }) {
     }
   }, []);
 
+  const [storyopen, setStoryOpen] = useState(false);
+  const [storyIndextoshow, setStoryIndextoshow] = useState(0);
+  const [storylist, setStorylist] = useState([]);
+
   useEffect(() => {
     const storiesall = stories.record;
-    let storyper = [];
-    storiesall.map((element) => {
-      element.stories.map((item) => {
-        storyper.push({
+    const storyper =
+      storiesall &&
+      storiesall.flatMap((element) =>
+        element.stories.map((item, index) => ({
           userId: element.userId,
+          userName: element.userName,
+          profilePictureName: element.profilePictureName,
+          index: index + 1,
+          outOf: element.stories.length,
           ...item,
-        });
-      });
-    });
-    console.log(storyper);
+        }))
+      );
+    setStorylist(storyper || []);
   }, [stories]);
 
-  const [storyopen, setStoryOpen] = useState(true);
+  function PrevStory() {
+    if (storyIndextoshow > 0) {
+      setStoryIndextoshow((prevIndex) => prevIndex - 1);
+    }
+  }
 
-  const [storytoshow, setStorytoshow] = useState();
+  function NextStory() {
+    if (storyIndextoshow < storylist.length - 1) {
+      setStoryIndextoshow((prevIndex) => prevIndex + 1);
+    }
+  }
 
-  const [storylist, setStorylist] = useState();
+  function handleStoryClick(userId) {
+    const storyIndex = storylist.findIndex(
+      (item) => item.userId === userId && item.isSeen === false
+    );
+    if (storyIndex !== -1) {
+      setStoryIndextoshow(storyIndex);
+      setStoryOpen(true);
+    }
+  }
 
-  // useEffect(() => {
-  //   console.log(storylist);
-  // }, [storylist]);
   return (
     <div
       style={{ display: "flex", gap: "15px", position: "relative" }}
@@ -125,7 +145,14 @@ function StoryScrollContainer({ list, onClick }) {
       {/* Model start Here  */}
 
       {storyopen && (
-        <StoryView handleCloseStoryView={() => setStoryOpen(false)} />
+        <StoryView
+          data={storylist[storyIndextoshow]}
+          isNext={storyIndextoshow < storylist.length - 1}
+          isPrev={storyIndextoshow > 0}
+          next={NextStory}
+          prev={PrevStory}
+          handleCloseStoryView={() => setStoryOpen(false)}
+        />
       )}
 
       {/* Model end Here */}
@@ -169,18 +196,25 @@ function StoryScrollContainer({ list, onClick }) {
           stories.record.length > 0 &&
           stories.record.map((element, index) => {
             return (
-              <div className="flex flex-col justify-center items-center">
+              <div
+                key={index}
+                className="flex flex-col justify-center items-center"
+              >
                 <div
-                  key={index}
                   className="flex items-center justify-center rounded-full border"
                   style={{ height: "70px", width: "70px" }}
+                  onClick={() => handleStoryClick(element.userId)}
                 >
                   <AvtarUser
                     sx={{
                       height: "100%",
                       width: "100%",
                       aspectRatio: "1",
-                      border: "2px solid red",
+                      border: `2px solid ${
+                        element.stories.find((item) => item.isSeen === false)
+                          ? "red"
+                          : "gray"
+                      }`,
                     }}
                     userId={element.userId}
                     photoName={element.profilePictureName}

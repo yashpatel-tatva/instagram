@@ -54,7 +54,7 @@ const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { userid } = useSelectorUserState();
-  const { user, userPhoto } = useSelectorUserAction();
+  const { user, userPhoto, pffcount } = useSelectorUserAction();
 
   useEffect(() => {
     if (userName === user.userName) {
@@ -102,12 +102,12 @@ const Profile = () => {
     } else {
       setShowProfileOf(user);
       const fetch = async () => {
-        const counts = await dispatch(getpffcountofother(userid));
-        setShowCounts(counts.payload.data);
+        // const counts = await dispatch(getpffcountofother(userid));
+        setShowCounts(pffcount);
       };
       fetch();
     }
-  }, [dispatch, userName, user, userid]);
+  }, [dispatch, userName, user, userid, pffcount]);
 
   function handleLogout() {
     dispatch(authAction.logout());
@@ -234,14 +234,17 @@ const Profile = () => {
   };
 
   const [openListModal, setOpenListModal] = React.useState(false);
-  const [listShow, setListShow] = useState();
+  const [listShow, setListShow] = useState([]);
   const [listName, setListName] = useState();
+  const [pageNumber, setPageNumber] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+
   const handleListOpen = async (value) => {
     if (!userName || !showProfileOf.isPrivate || showProfileOf.isFollowing) {
       setListName(value);
       const payload = {
         pageNumber: 1,
-        pageSize: 110,
+        pageSize: 10,
         searchName: "",
         model: {
           userId: showProfileOf.userId,
@@ -250,12 +253,31 @@ const Profile = () => {
       };
       const res = await dispatch(folloerorfollowinglist(payload));
       setListShow(res.payload.data.record);
+      setHasMore(res.payload.data.record.length === 10);
+      setPageNumber(2);
       setOpenListModal(true);
     }
   };
+
   const handleClose = () => {
     setOpenListModal(false);
     setOpenQR(false);
+  };
+
+  const handleLoadMore = async () => {
+    const payload = {
+      pageNumber: pageNumber,
+      pageSize: 10,
+      searchName: "",
+      model: {
+        userId: showProfileOf.userId,
+        followerOrFollowing: listName,
+      },
+    };
+    const res = await dispatch(folloerorfollowinglist(payload));
+    setListShow((prevList) => [...prevList, ...res.payload.data.record]);
+    setHasMore(res.payload.data.record.length === 10);
+    setPageNumber(pageNumber + 1);
   };
 
   const [openQR, setOpenQR] = useState(false);
@@ -645,7 +667,7 @@ const Profile = () => {
                       ))}
                   </ImageList>
                 ) : (
-                  <div className="flex justify-center items-center  flex-col w-7/12">
+                  <div className="flex justify-center items-center fm:w-full  flex-col w-7/12">
                     {postList &&
                       postList.length !== 0 &&
                       postList.map((post) => (
@@ -745,6 +767,11 @@ const Profile = () => {
                   </div>
                 );
               })}
+              {hasMore && (
+                <Button onClick={handleLoadMore} disabled={!hasMore}>
+                  Load More
+                </Button>
+              )}
             </div>
           ) : (
             <>Not Any</>

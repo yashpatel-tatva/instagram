@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AvtarUser from "./AvtarUser";
+import { useSelectorUserAction } from "../../redux/slices/UserActionSlice";
+import { AllRoutes } from "../../constants/AllRoutes";
 
 const AvtarUserwithName = ({ data, onClick, comment = "" }) => {
+  const { user } = useSelectorUserAction();
   return (
     <Link
-      to={`/userprofile/${data.userName}`}
+      to={
+        user.userId === data.userId
+          ? AllRoutes.UserProfile
+          : `/userprofile/${data.userName}`
+      }
       style={{ display: "flex", width: "fit-content" }}
       onClick={onClick}
     >

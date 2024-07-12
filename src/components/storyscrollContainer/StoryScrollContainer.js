@@ -152,6 +152,19 @@ function StoryScrollContainer({ list, onClick }) {
     // );
   }
 
+  function handleCloseStoryView() {
+    setStoryOpen(false);
+    const data = {
+      pageNumber: 1,
+      pageSize: 100,
+      searchName: "",
+      model: {
+        userId: userid,
+      },
+    };
+    dispatch(storylisttoshow(data));
+  }
+
   return (
     <div
       style={{ display: "flex", gap: "15px", position: "relative" }}
@@ -160,7 +173,7 @@ function StoryScrollContainer({ list, onClick }) {
       {/* Model start Here  */}
 
       {storyopen && (
-        <Modal open onClose={() => setStoryOpen(false)}>
+        <Modal open onClose={handleCloseStoryView}>
           <StoryView
             key={storyIndextoshow}
             data={storylist[storyIndextoshow]}
@@ -168,7 +181,7 @@ function StoryScrollContainer({ list, onClick }) {
             isPrev={storyIndextoshow > 0}
             next={NextStory}
             prev={PrevStory}
-            handleCloseStoryView={() => setStoryOpen(false)}
+            handleCloseStoryView={handleCloseStoryView}
             handleseen={handleseen}
           />
         </Modal>
@@ -205,7 +218,8 @@ function StoryScrollContainer({ list, onClick }) {
                 aspectRatio: "1",
                 border: "2px solid red",
               }}
-              src={userPhoto}
+              userId={user.userId}
+              photoName={user.profilePictureName}
             ></AvtarUser>
           </div>
           <div className="text-sm">{user.userName}</div>

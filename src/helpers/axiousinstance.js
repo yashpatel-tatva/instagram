@@ -17,7 +17,7 @@ function logoutUser() {
 
 // Axios instance configuration
 const axiosInstance = axios.create({
-  baseURL: "https://pvs7vr93fs00.share.zrok.io/api",
+  baseURL: "http://192.168.2.152:6072/api",
   withCredentials: false,
 });
 

@@ -80,7 +80,7 @@ export const Home = () => {
 
   return (
     <div>
-      <div className="formobile">
+      <div className="formobile sticky top-0 bg-white z-10 pb-3">
         <div
           className="w-screen justify-between flex border-b-2 "
           style={{ padding: "2% 4%" }}
@@ -124,7 +124,7 @@ export const Home = () => {
           ></Notificaion>
         </div>
       </Drawer>
-      <div className="flex">
+      <div className="flex sticky top-0 fm:top-14 bg-white z-10 pb-3">
         <div className="flex flex-grow  w-7/12">
           <StoryScrollContainer />
         </div>

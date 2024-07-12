@@ -224,7 +224,7 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
   return (
     <div
       value={updaterender}
-      className="w-8/12 fnm:relative md:w-9/12 fm:w-full border-b-2 fnm:border-0"
+      className=" w-8/12 fnm:relative md:w-9/12 fm:w-full border-b-2 fnm:border-0"
     >
       <div className="flex justify-between items-center">
         <div className="flex gap-3 items-center">

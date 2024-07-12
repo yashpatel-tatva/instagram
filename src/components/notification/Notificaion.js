@@ -114,7 +114,7 @@ const Notificaion = ({ closeDrawer }) => {
               })}
             </div>
           ) : (
-            <p className="text-center w-full">No request Found</p>
+            <p className="text-center w-full">No Notification Found</p>
           )}
         </div>
       </div>

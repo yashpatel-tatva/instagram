@@ -13,7 +13,7 @@ import {
 } from "react-router-dom";
 import { AllRoutes } from "./constants/AllRoutes";
 import ResetPassword from "./pages/forgetpassword/ResetPassword";
-import { userAction } from "./redux/slices/UserActionSlice";
+import { storylisttoshow, userAction } from "./redux/slices/UserActionSlice";
 import { isExpired } from "react-jwt";
 import { setNavigate } from "./helpers/axiousinstance";
 
@@ -24,12 +24,31 @@ function App() {
   useEffect(() => {
     setNavigate(dispatch);
   }, [dispatch]);
+  const { userid } = useSelectorUserState();
+
+  // useEffect(() => {
+  //   const myTask = () => {
+  //     const data = {
+  //       pageNumber: 1,
+  //       pageSize: 100,
+  //       searchName: "",
+  //       model: {
+  //         userId: userid,
+  //       },
+  //     };
+  //     dispatch(storylisttoshow(data));
+  //   };
+  //   myTask();
+  //   const intervalId = setInterval(myTask, 20000);
+  //   return () => clearInterval(intervalId);
+  // }, []);
 
   const { isLoggedIn } = useSelectorUserState();
   const token = localStorage.getItem("token");
   if (!!token) {
     if (isExpired(token)) {
       dispatch(authAction.logout());
+      dispatch(userAction.logout());
     }
   }
   const location = useLocation();

@@ -10,12 +10,17 @@ import { useDispatch } from "react-redux";
 import {
   postfeedlist,
   suggestionlist,
+  useSelectorUserAction,
 } from "../../redux/slices/UserActionSlice";
 import AvtarUserwithName from "../../components/avtarofuser/AvtarUserwithName";
 import PostContainer from "../../components/postcontainer/PostContainer";
+import CircularProgress from "@mui/material/CircularProgress";
+import AvtarUserwithFollowbtn from "../../components/avtarofuser/AvtarUserwithFollowbtn";
 
 export const Home = () => {
   const [openNotification, setOpenNotification] = React.useState(false);
+
+  const { user, userPhoto } = useSelectorUserAction();
 
   const toggleNotificationDrawer = (newOpen) => () => {
     setOpenNotification(newOpen);
@@ -24,14 +29,17 @@ export const Home = () => {
   const dispatch = useDispatch();
 
   const [suggestionList, setSuggestionList] = useState([]);
-  const [isMoreSuggestion, setIsMoreSugestioon] = useState(false);
+  const [isMoreSuggestion, setIsMoreSugestion] = useState(false);
+  const [isSuggestionLoader, setIsSugestionLoader] = useState(true);
   const [pageNumberSuggestion, setPageNumberSuggestion] = useState(1);
 
   const [postfeedList, setPostfeedList] = useState([]);
   const [isMoreSPost, setIsMorePost] = useState(false);
+  const [isSPostLoader, setIsPostLoader] = useState(true);
   const [pageNumberPost, setPageNumberPost] = useState(1);
 
   useEffect(() => {
+    setIsSugestionLoader(true);
     const data = {
       pageNumber: pageNumberSuggestion,
       pageSize: Math.floor(window.innerHeight / 100),
@@ -42,9 +50,8 @@ export const Home = () => {
         ...oldstate,
         ...res.payload.data.record,
       ]);
-      setIsMoreSugestioon(
-        res.payload.data.requirdPage !== pageNumberSuggestion
-      );
+      setIsMoreSugestion(res.payload.data.requirdPage !== pageNumberSuggestion);
+      setIsSugestionLoader(false);
     };
     fetch();
   }, [pageNumberSuggestion]);
@@ -53,18 +60,16 @@ export const Home = () => {
     setPageNumberSuggestion((n) => n + 1);
   }
   useEffect(() => {
+    setIsPostLoader(true);
     const data = {
       pageNumber: pageNumberPost,
       pageSize: 6,
-      searchName: "string",
-      model: {
-        postType: "Post",
-      },
     };
     const fetch = async () => {
       const res = await dispatch(postfeedlist(data));
       setPostfeedList((oldstate) => [...oldstate, ...res.payload.data.record]);
       setIsMorePost(res.payload.data.requirdPage !== pageNumberPost);
+      setIsPostLoader(false);
     };
     fetch();
   }, [pageNumberPost]);
@@ -119,15 +124,22 @@ export const Home = () => {
           ></Notificaion>
         </div>
       </Drawer>
-      <div>
-        <div>
+      <div className="flex">
+        <div className="flex flex-grow  w-7/12">
           <StoryScrollContainer />
+        </div>
+        <div className="w-3/12 lg:hidden flex justify-center items-center ">
+          <AvtarUserwithName data={{ ...user }}></AvtarUserwithName>
         </div>
         <div className="formobile border-b-2"></div>
       </div>
       <div className="flex">
         <div className="flex justify-center items-start flex-grow">
-          <Stack justifyContent={"center"} alignItems="center">
+          <Stack
+            sx={{ width: "100%" }}
+            justifyContent={"center"}
+            alignItems="center"
+          >
             {postfeedList &&
               postfeedList.length > 0 &&
               postfeedList.map((post) => (
@@ -139,26 +151,23 @@ export const Home = () => {
             {isMoreSPost && (
               <div className="text-center p-4" onClick={showmorePost}>
                 <p role="button" className="text-cyan-600 p-3">
-                  Load More
+                  {isSPostLoader ? <CircularProgress /> : "Load More"}
                 </p>
               </div>
             )}
           </Stack>
         </div>
         <div className="w-3/12 lg:hidden overflow-scroll">
+          <div className="font-semibold p-4 text-lg">Suggested for you</div>
           <Stack spacing={2}>
             {suggestionList &&
               suggestionList.length > 0 &&
               suggestionList.map((item) => {
                 return (
                   <div key={item.userId}>
-                    <AvtarUserwithName
-                      data={{
-                        userName: item.userName,
-                        userId: item.userId,
-                        profilePictureName: item.profilePictureName,
-                      }}
-                      comment="Suggested For You"
+                    <AvtarUserwithFollowbtn
+                      data={item}
+                      setResult={setSuggestionList}
                     />
                   </div>
                 );
@@ -167,7 +176,11 @@ export const Home = () => {
           {isMoreSuggestion && (
             <div className="text-center p-4" onClick={showmoreSugg}>
               <p role="button" className="text-cyan-600 p-3">
-                Show More
+                {isSuggestionLoader ? (
+                  <CircularProgress></CircularProgress>
+                ) : (
+                  "Show More"
+                )}
               </p>
             </div>
           )}

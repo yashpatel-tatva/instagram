@@ -8,7 +8,6 @@ import {
   Menu,
   MenuItem,
   Modal,
-  Skeleton,
   Stack,
   TextField,
 } from "@mui/material";
@@ -26,7 +25,6 @@ import {
 import { useDispatch } from "react-redux";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import AvtarUser from "../avtarofuser/AvtarUser";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import AvtarUserwithName from "../avtarofuser/AvtarUserwithName";
 
@@ -45,9 +43,20 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
   const [likeCount, setLikeCount] = useState(data.postLikes.length);
 
   useEffect(() => {
+    setIsLike(
+      !!data.postLikes.find((element) => element.userId === user.userId)
+    );
+  }, [data, user.userId]);
+
+  useEffect(() => {
     let medialist = [];
     data.medias.map((media) =>
-      medialist.push({ userId: data.userId, postName: media.mediaName })
+      medialist.push({
+        userId: data.userId,
+        postName: media.mediaName,
+        postType: data.postType,
+        mediaType: media.mediaType,
+      })
     );
     setMediaName(medialist);
   }, []);
@@ -59,19 +68,21 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
         const fetchPromises = mediaName.map(async (element) => {
           const payload = {
             data: element,
-            type: "Post",
+            type: element.postType,
           };
           const res = await dispatch(getmediafromname(payload));
-          const img = {
-            src:
-              "data:" +
-              res.payload.data.fileType +
-              ";base64, " +
-              res.payload.data.imageBase64,
-            count: element.count,
-            postId: element.postId,
-          };
-          return img;
+          if (res.meta.requestStatus === "fulfilled") {
+            const img = {
+              src:
+                "data:" +
+                res.payload.data.fileType +
+                ";base64, " +
+                res.payload.data.imageBase64,
+              count: element.count,
+              postId: element.postId,
+            };
+            return img;
+          }
         });
 
         const imgList = await Promise.all(fetchPromises);
@@ -104,7 +115,7 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
 
   async function handleDeletePost() {
     setIsDeleted(true);
-    const res = await dispatch(deletepost(data.postId));
+    await dispatch(deletepost(data.postId));
     dispatch(getpostfollowerfollowingcount(data.userId));
   }
 
@@ -165,7 +176,7 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
 
   async function renderPost() {
     const res = await dispatch(
-      getpostbyid({ postType: "Post", postId: data.postId })
+      getpostbyid({ postType: data.postType, postId: data.postId })
     );
     setData(res.payload.data);
     setIsLike(
@@ -213,7 +224,7 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
   return (
     <div
       value={updaterender}
-      className="w-6/12 fnm:relative md:w-9/12 fm:w-full border-b-2 fnm:border-0"
+      className="w-8/12 fnm:relative md:w-9/12 fm:w-full border-b-2 fnm:border-0"
     >
       <div className="flex justify-between items-center">
         <div className="flex gap-3 items-center">
@@ -230,7 +241,7 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
               }}
               comment={data.location ?? " "}
               alt=""
-            />{" "}
+            />
           </div>
         </div>
         <div>
@@ -300,13 +311,17 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
           ) : (
             imgList &&
             imgList.length !== 0 && (
-              <img
+              <video
+                poster={imgList[index].src}
                 onDoubleClick={handleLike}
                 src={imgList[index].src}
+                autoPlay
+                loop
                 className="rounded"
                 style={{ width: "100%" }}
                 alt=""
-              ></img>
+                loading="lazy"
+              ></video>
             )
           )}
         </div>

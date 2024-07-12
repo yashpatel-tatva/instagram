@@ -18,12 +18,16 @@ const initialState = {
   NotificationList: null,
   stories: {},
   personalstories: {},
+  imgcache: {},
 };
 
 const useractionSlice = createSlice({
   name: "useraction",
   initialState,
   reducers: {
+    logout(state) {
+      return initialState;
+    },
     resetErrors(state) {
       state.isError = false;
       state.ErrorMessage = "";
@@ -198,6 +202,7 @@ export const getuserdata = createAsyncThunk(
     }
   }
 );
+
 export const getotheruserdata = createAsyncThunk(
   "user/getotheruserdata",
   async (userId, thunkAPI) => {
@@ -236,6 +241,7 @@ export const deleteprofilephoto = createAsyncThunk(
     return response.data;
   }
 );
+
 export const getpostfollowerfollowingcount = createAsyncThunk(
   "user/getpostfollowerfollowingcount",
   async (userId) => {
@@ -245,6 +251,7 @@ export const getpostfollowerfollowingcount = createAsyncThunk(
     return countres.data;
   }
 );
+
 export const getpffcountofother = createAsyncThunk(
   "user/getpffcountofother",
   async (userId) => {
@@ -354,6 +361,7 @@ export const createpost = createAsyncThunk(
     }
   }
 );
+
 export const getPostOrReel = createAsyncThunk(
   "user/getPostOrReel",
   async (data, thunkAPI) => {
@@ -381,6 +389,7 @@ export const getPostOrReel = createAsyncThunk(
     }
   }
 );
+
 export const getmediafromname = createAsyncThunk(
   "user/getmediafromname",
   async (payload, thunkAPI) => {
@@ -410,6 +419,7 @@ export const getmediafromname = createAsyncThunk(
     }
   }
 );
+
 export const addstory = createAsyncThunk(
   "user/addstory",
   async (data, thunkAPI) => {
@@ -481,6 +491,7 @@ export const likeunlikepost = createAsyncThunk(
     }
   }
 );
+
 export const commentonpost = createAsyncThunk(
   "user/commentonpost",
   async (data, thunkAPI) => {
@@ -532,6 +543,7 @@ export const searchbyusername = createAsyncThunk(
     }
   }
 );
+
 export const followrequest = createAsyncThunk(
   "user/followrequest",
   async (data, thunkAPI) => {
@@ -555,6 +567,7 @@ export const followrequest = createAsyncThunk(
     }
   }
 );
+
 export const requestList = createAsyncThunk(
   "user/requestList",
   async (data, thunkAPI) => {
@@ -578,6 +591,7 @@ export const requestList = createAsyncThunk(
     }
   }
 );
+
 export const requestacceptorcancel = createAsyncThunk(
   "user/requestacceptorcancel",
   async (data, thunkAPI) => {
@@ -599,6 +613,7 @@ export const requestacceptorcancel = createAsyncThunk(
     }
   }
 );
+
 export const getpostbyid = createAsyncThunk(
   "user/postId",
   async (data, thunkAPI) => {
@@ -626,6 +641,7 @@ export const getpostbyid = createAsyncThunk(
     }
   }
 );
+
 export const folloerorfollowinglist = createAsyncThunk(
   "user/folloerorfollowinglist",
   async (data, thunkAPI) => {
@@ -653,6 +669,7 @@ export const folloerorfollowinglist = createAsyncThunk(
     }
   }
 );
+
 export const deletepost = createAsyncThunk(
   "user/deletepost",
   async (data, thunkAPI) => {
@@ -702,6 +719,7 @@ export const notificationlist = createAsyncThunk(
     }
   }
 );
+
 export const storylisttoshow = createAsyncThunk(
   "story/storylisttoshow",
   async (data, thunkAPI) => {
@@ -729,6 +747,7 @@ export const storylisttoshow = createAsyncThunk(
     }
   }
 );
+
 export const personalstorylist = createAsyncThunk(
   "story/personalstorylist",
   async (thunkAPI) => {
@@ -782,6 +801,26 @@ export const getstorymedia = createAsyncThunk(
   }
 );
 
+export const storyseen = createAsyncThunk(
+  "story/storyseen",
+  async (data, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post("/Story/StorySeen", data);
+      if (response.status >= 200 && response.status < 300) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(await response.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        return thunkAPI.rejectWithValue(error.response.data);
+      } else {
+        return thunkAPI.rejectWithValue({ message: error.message });
+      }
+    }
+  }
+);
+
 export const suggestionlist = createAsyncThunk(
   "user/getsuggetionlist",
   async (data, thunkAPI) => {
@@ -809,6 +848,7 @@ export const suggestionlist = createAsyncThunk(
     }
   }
 );
+
 export const postfeedlist = createAsyncThunk(
   "post/postfeedlist",
   async (data, thunkAPI) => {

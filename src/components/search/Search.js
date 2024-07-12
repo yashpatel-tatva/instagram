@@ -5,7 +5,7 @@ import CustomInputField from "../custominputs/CustomInputField";
 import { useSelectorUserState } from "../../redux/slices/AuthSlice";
 import { useDispatch } from "react-redux";
 import { searchbyusername } from "../../redux/slices/UserActionSlice";
-import AvtarUserwithName from "../avtarofuser/AvtarUserwithName";
+import AvtarUserwithFollowbtn from "../avtarofuser/AvtarUserwithFollowbtn";
 
 const Search = ({ closeDrawer }) => {
   const { userid } = useSelectorUserState();
@@ -63,11 +63,11 @@ const Search = ({ closeDrawer }) => {
         {result &&
           result.map((element, index) => {
             return (
-              <AvtarUserwithName
-                onClick={closeDrawer}
-                key={index}
+              <AvtarUserwithFollowbtn
                 data={element}
-              ></AvtarUserwithName>
+                onclick={closeDrawer}
+                setResult={setResult}
+              />
             );
           })}
       </Stack>

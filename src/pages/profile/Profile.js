@@ -3,6 +3,8 @@ import { useDispatch } from "react-redux";
 import CloseIcon from "@mui/icons-material/Close";
 import { authAction, useSelectorUserState } from "../../redux/slices/AuthSlice";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
+import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import {
   folloerorfollowinglist,
   followrequest,
@@ -109,6 +111,7 @@ const Profile = () => {
 
   function handleLogout() {
     dispatch(authAction.logout());
+    dispatch(userAction.logout());
     navigate(AllRoutes.Home);
   }
   const [value, setValue] = React.useState("Post");
@@ -196,10 +199,6 @@ const Profile = () => {
     }
   }, [showMedia]);
 
-  function hadnlePostClick(postId) {
-    console.log(postId);
-  }
-
   const [loader, setLoadrt] = useState(false);
 
   async function handleFollowClick() {
@@ -272,6 +271,44 @@ const Profile = () => {
 
     setCopied(false);
   };
+
+  ////////////////open post ////////////////////////////
+
+  const [openPost, setOpenPost] = useState(false);
+  const [postindex, setPostIndex] = useState(0);
+  const [postToshow, setPostToShow] = useState();
+
+  const [isNext, setIsNext] = useState(false);
+  const [isPrev, setIsPrev] = useState(false);
+
+  useEffect(() => {
+    if (postList) {
+      setIsNext(postindex < postList.length - 1);
+      setIsPrev(postindex > 0);
+    }
+  }, [postList, postindex]);
+
+  function hadnlePostClick(postId) {
+    setPostIndex(postList.findIndex((post) => post.postId === postId));
+    setPostToShow(postList.find((post) => post.postId === postId));
+    setOpenPost(true);
+  }
+  useEffect(() => {
+    if (postList) {
+      setPostToShow(postList[postindex]);
+    }
+  }, [postList, postindex]);
+
+  function next() {
+    if (postindex < postList.length - 1) {
+      setPostIndex((n) => n + 1);
+    }
+  }
+  function prev() {
+    if (postindex > 0) {
+      setPostIndex((n) => n - 1);
+    }
+  }
 
   return (
     <div className="">
@@ -599,7 +636,7 @@ const Profile = () => {
                             poster={item.src}
                             autoPlay
                             loop
-                            className="h-full w-full"
+                            className="imgvideolist h-full w-full"
                             src={item.src}
                             alt={item.title}
                             loading="lazy"
@@ -608,7 +645,7 @@ const Profile = () => {
                       ))}
                   </ImageList>
                 ) : (
-                  <>
+                  <div className="flex justify-center items-center  flex-col w-7/12">
                     {postList &&
                       postList.length !== 0 &&
                       postList.map((post) => (
@@ -621,7 +658,7 @@ const Profile = () => {
                           postUserName={showProfileOf.userName}
                         ></PostContainer>
                       ))}
-                  </>
+                  </div>
                 )}
               </div>
             </>
@@ -654,15 +691,15 @@ const Profile = () => {
                 }
                 onCopy={() => setCopied(true)}
               >
-                <div className="flex border-2 items-center">
-                  <span>
+                <div className="border-2 text-center">
+                  <span style={{ float: "left" }}>
                     {window.location.origin +
                       "/userprofile/" +
                       showProfileOf.userName}
+                    <IconButton>
+                      <ContentCopyIcon />
+                    </IconButton>
                   </span>
-                  <IconButton>
-                    <ContentCopyIcon />
-                  </IconButton>
                 </div>
               </CopyToClipboard>
             </div>
@@ -714,6 +751,70 @@ const Profile = () => {
           )}
         </Box>
       </Modal>
+
+      {/* ///openpost//// */}
+      {openPost && (
+        <Modal open onClose={() => setOpenPost(false)}>
+          <Box
+            sx={{ height: "100%" }}
+            className="flex justify-center items-center"
+          >
+            <IconButton
+              sx={{
+                position: "absolute",
+                zIndex: "4",
+                right: "1%",
+                top: "1%",
+                backgroundColor: "white",
+                "&:hover": { backgroundColor: "pink" },
+              }}
+              onClick={() => setOpenPost(false)}
+            >
+              <CloseIcon></CloseIcon>
+            </IconButton>
+            {isNext && (
+              <IconButton
+                sx={{
+                  position: "absolute",
+                  zIndex: "4",
+                  right: "1%",
+                  top: "50%",
+                  backgroundColor: "white",
+                  "&:hover": { backgroundColor: "lightcoral" },
+                }}
+                onClick={next}
+              >
+                <ChevronRightOutlinedIcon />
+              </IconButton>
+            )}
+            {isPrev && (
+              <IconButton
+                sx={{
+                  position: "absolute",
+                  zIndex: "4",
+                  left: "1%",
+                  top: "50%",
+                  backgroundColor: "white",
+                  "&:hover": { backgroundColor: "lightcoral" },
+                }}
+                onClick={prev}
+              >
+                <ChevronLeftOutlinedIcon />
+              </IconButton>
+            )}
+            <div className="bg-white w-1/2 md:w-3/4  fm:w-full fm:h-full flex justify-center items-center">
+              <PostContainer
+                key={postToshow.postId}
+                postdata={postToshow}
+                postProfilePhoto={
+                  userName ? showProfileOf.profilePic : userPhoto
+                }
+                postUserName={showProfileOf.userName}
+              ></PostContainer>
+            </div>
+          </Box>
+        </Modal>
+      )}
     </div>
   );
 };

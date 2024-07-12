@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { useSelectorUserState } from "../../redux/slices/AuthSlice";
 import AvtarUser from "../avtarofuser/AvtarUser";
 import StoryView from "./StoryView";
+import { Modal } from "@mui/material";
 
 function StoryScrollContainer({ list, onClick }) {
   const scrollRef = useRef(null);
@@ -79,7 +80,7 @@ function StoryScrollContainer({ list, onClick }) {
   };
   const dispatch = useDispatch();
   const { userid } = useSelectorUserState();
-  const { stories, user } = useSelectorUserAction();
+  const { stories, user, userPhoto } = useSelectorUserAction();
   useEffect(() => {
     if (!Object.keys(stories).length > 0) {
       const data = {
@@ -134,25 +135,43 @@ function StoryScrollContainer({ list, onClick }) {
     if (storyIndex !== -1) {
       setStoryIndextoshow(storyIndex);
       setStoryOpen(true);
+    } else {
+      const newstoryindex = storylist.findIndex(
+        (item) => item.userId === userId
+      );
+      setStoryIndextoshow(newstoryindex);
+      setStoryOpen(true);
     }
+  }
+
+  function handleseen(storyId) {
+    // setStorylist((prevStorylist) =>
+    //   prevStorylist.map((story) =>
+    //     story.storyId === storyId ? { ...story, isSeen: true } : story
+    //   )
+    // );
   }
 
   return (
     <div
       style={{ display: "flex", gap: "15px", position: "relative" }}
-      className="p-3"
+      className="w-full p-3"
     >
       {/* Model start Here  */}
 
       {storyopen && (
-        <StoryView
-          data={storylist[storyIndextoshow]}
-          isNext={storyIndextoshow < storylist.length - 1}
-          isPrev={storyIndextoshow > 0}
-          next={NextStory}
-          prev={PrevStory}
-          handleCloseStoryView={() => setStoryOpen(false)}
-        />
+        <Modal open onClose={() => setStoryOpen(false)}>
+          <StoryView
+            key={storyIndextoshow}
+            data={storylist[storyIndextoshow]}
+            isNext={storyIndextoshow < storylist.length - 1}
+            isPrev={storyIndextoshow > 0}
+            next={NextStory}
+            prev={PrevStory}
+            handleCloseStoryView={() => setStoryOpen(false)}
+            handleseen={handleseen}
+          />
+        </Modal>
       )}
 
       {/* Model end Here */}
@@ -186,8 +205,7 @@ function StoryScrollContainer({ list, onClick }) {
                 aspectRatio: "1",
                 border: "2px solid red",
               }}
-              userId={userid}
-              photoName={user.profilePictureName}
+              src={userPhoto}
             ></AvtarUser>
           </div>
           <div className="text-sm">{user.userName}</div>

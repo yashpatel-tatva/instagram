@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { authAction, useSelectorUserState } from "../redux/slices/AuthSlice";
 import {
   getuserdata,
+  userAction,
   useSelectorUserAction,
 } from "../redux/slices/UserActionSlice";
 import { Bounce, toast } from "react-toastify";
@@ -24,6 +25,7 @@ const SideBottomBar = ({ children }) => {
   const navigate = useNavigate();
   function handleLogout() {
     dispatch(authAction.logout());
+    dispatch(userAction.logout());
     navigate(AllRoutes.Home);
   }
   const { userid } = useSelectorUserState();

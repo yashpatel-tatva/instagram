@@ -29,6 +29,8 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import AvtarUserwithName from "../avtarofuser/AvtarUserwithName";
+import AvatarGroup from "@mui/material/AvatarGroup";
+import AvtarGroupthree from "../avtarofuser/AvtarGroupthree";
 
 const PostContainer = ({ postdata, postUserName }) => {
   const dispatch = useDispatch();
@@ -354,7 +356,12 @@ const PostContainer = ({ postdata, postUserName }) => {
         </IconButton>
       </div>
       <div role="button">
-        <span onClick={() => handleListOpen("Likes")}>{likeCount} likes</span>
+        <div
+          onClick={() => handleListOpen("Likes")}
+          className="flex gap-3 items-center"
+        >
+          <AvtarGroupthree data={data.postLikes} /> {likeCount} likes
+        </div>
       </div>
       <div>
         <span>{postUserName}</span>

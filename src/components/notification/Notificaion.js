@@ -1,15 +1,18 @@
-import { IconButton, CircularProgress, Stack } from "@mui/material";
+import { IconButton, CircularProgress, Stack, Modal } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import { useDispatch } from "react-redux";
 import { useSelectorUserState } from "../../redux/slices/AuthSlice";
 import {
+  getpostbyid,
   notificationlist,
   requestacceptorcancel,
   requestList,
 } from "../../redux/slices/UserActionSlice";
 import Request from "./Request";
 import AvtarUserwithName from "../avtarofuser/AvtarUserwithName";
+import PostContainer from "../postcontainer/PostContainer";
+import CloseIcon from "@mui/icons-material/Close";
 
 const Notificaion = ({ closeDrawer }) => {
   const dispatch = useDispatch();
@@ -89,6 +92,21 @@ const Notificaion = ({ closeDrawer }) => {
     setRequests(res.payload.data.record);
   };
 
+  const [openPost, setOpenPost] = useState(false);
+  const [postToshow, setPostToShow] = useState();
+
+  async function handleClick(noty) {
+    if (noty.postId !== 0) {
+      const res = await dispatch(
+        getpostbyid({ postType: "Post", postId: noty.postId })
+      );
+      if (res.payload.isSuccess) {
+        setOpenPost(true);
+        setPostToShow(res.payload.data);
+      }
+    }
+  }
+
   return (
     <div className="h-full">
       <div
@@ -136,7 +154,7 @@ const Notificaion = ({ closeDrawer }) => {
                     profilePictureName: element.profileName,
                   }}
                   comment={element.message}
-                  onClick={closeDrawer}
+                  onClick={() => handleClick(element)}
                 />
               ))}
               {isMoreNotification && (
@@ -155,6 +173,33 @@ const Notificaion = ({ closeDrawer }) => {
           )}
         </div>
       </div>
+      {openPost && (
+        <Modal open onClose={() => setOpenPost(false)}>
+          <div className="flex justify-center items-center h-full">
+            <IconButton
+              sx={{
+                position: "absolute",
+                zIndex: "4",
+                right: "1%",
+                top: "1%",
+                backgroundColor: "white",
+                "&:hover": { backgroundColor: "pink" },
+              }}
+              onClick={() => setOpenPost(false)}
+            >
+              <CloseIcon></CloseIcon>
+            </IconButton>
+
+            <div className="bg-white w-1/2 md:w-3/4  fm:w-full fm:h-full flex justify-center items-center">
+              <PostContainer
+                style={{ maxHeight: "100%" }}
+                key={postToshow.postId}
+                postdata={postToshow}
+              ></PostContainer>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

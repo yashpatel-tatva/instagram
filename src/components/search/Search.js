@@ -48,6 +48,7 @@ const Search = ({ closeDrawer }) => {
   };
 
   const loadMoreResults = () => {
+    setIsLoader(true);
     setPageNumber((prev) => prev + 1);
   };
 

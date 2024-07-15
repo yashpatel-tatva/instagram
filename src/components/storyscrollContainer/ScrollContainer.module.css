@@ -20,3 +20,22 @@
 .scrollbtns:hover {
     opacity: 1;
 }
+
+
+@keyframes pendulum {
+    0% {
+        transform: rotateX(-90deg);
+    }
+
+    100% {
+        transform: rotateX(0deg);
+    }
+}
+
+.commentbox{
+    z-index: 10000;
+    bottom: 0;
+    width: 100%;
+    animation: pendulum 0.5s ease-in-out 1;
+    transform-origin: bottom center;
+}

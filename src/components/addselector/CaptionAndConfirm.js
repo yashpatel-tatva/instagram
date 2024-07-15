@@ -12,6 +12,8 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import {
   addstory,
   createpost,
+  getpostfollowerfollowingcount,
+  personalstorylist,
   useSelectorUserAction,
 } from "../../redux/slices/UserActionSlice";
 import PlaceIcon from "@mui/icons-material/Place";
@@ -62,6 +64,7 @@ const CaptionAndConfirm = (data) => {
       const res = await dispatch(createpost(formData));
       if (res.payload.isSuccess) {
         handleClose();
+        dispatch(getpostfollowerfollowingcount(user.userId));
         navigate(AllRoutes.UserProfile, { replace: true });
       }
     } else {
@@ -71,6 +74,7 @@ const CaptionAndConfirm = (data) => {
       });
       const res = await dispatch(addstory(formData));
       if (res.payload.isSuccess) {
+        dispatch(personalstorylist());
         handleClose();
       }
     }
@@ -87,7 +91,7 @@ const CaptionAndConfirm = (data) => {
     return new Blob([ab], { type: mimeString });
   }
   return (
-    <Backdrop open={open} sx={{ zIndex: "9" }}>
+    <Backdrop open={open} sx={{ zIndex: "1000" }}>
       <div className="relative w-full h-2/3 fm:h-full bg-white z-10">
         <div
           className="w-full flex items-center p-2 px-4 justify-between bg-gray-600 text-white"

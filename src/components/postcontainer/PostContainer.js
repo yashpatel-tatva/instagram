@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { assets } from "../../constants/Assets";
 import "./PostContainer.css";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Box,
   IconButton,
@@ -15,6 +16,7 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import EllipsisTextUptoTwo from "../ellipsisTextTwoline/EllipsisTextUptoTwo";
 import {
   commentonpost,
+  deletecommentonpost,
   deletepost,
   getmediafromname,
   getpostbyid,
@@ -28,7 +30,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import AvtarUserwithName from "../avtarofuser/AvtarUserwithName";
 
-const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
+const PostContainer = ({ postdata, postUserName }) => {
   const dispatch = useDispatch();
   const [data, setData] = useState(postdata);
   const { user, updaterender } = useSelectorUserAction();
@@ -195,6 +197,11 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
     setopenComment(!openComment);
   }
 
+  async function deleteCommment(commentId) {
+    await dispatch(deletecommentonpost(commentId));
+    await renderPost();
+  }
+
   //like section
 
   const style = {
@@ -318,7 +325,7 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
                 autoPlay
                 loop
                 className="rounded"
-                style={{ width: "100%" }}
+                style={{ width: "100%", maxHeight: "60vh" }}
                 alt=""
                 loading="lazy"
               ></video>
@@ -377,15 +384,28 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
             <>
               {data.postComments.map((element) => {
                 return (
-                  <AvtarUserwithName
+                  <div
+                    className="flex justify-between items-center"
                     key={element.commentId}
-                    data={{
-                      userName: element.userName,
-                      userId: element.userId,
-                      profilePictureName: element.avtar,
-                    }}
-                    comment={element.commentText}
-                  ></AvtarUserwithName>
+                  >
+                    <AvtarUserwithName
+                      data={{
+                        userName: element.userName,
+                        userId: element.userId,
+                        profilePictureName: element.avtar,
+                      }}
+                      comment={element.commentText}
+                    ></AvtarUserwithName>
+                    {element.userId === user.userId && (
+                      <IconButton
+                        aria-label="delete"
+                        size="large"
+                        onClick={() => deleteCommment(element.commentId)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    )}
+                  </div>
                 );
               })}
             </>
@@ -416,7 +436,6 @@ const PostContainer = ({ postdata, postUserName, postProfilePhoto }) => {
             <span></span>
             <span>{listName}</span>
             <IconButton onClick={handleClose}>
-              {" "}
               <CloseIcon />
             </IconButton>
           </div>

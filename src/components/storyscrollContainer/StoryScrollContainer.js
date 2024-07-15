@@ -3,6 +3,7 @@ import styles from "./ScrollContainer.module.css";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
 import {
+  personalstorylist,
   storylisttoshow,
   useSelectorUserAction,
 } from "../../redux/slices/UserActionSlice";
@@ -11,6 +12,13 @@ import { useSelectorUserState } from "../../redux/slices/AuthSlice";
 import AvtarUser from "../avtarofuser/AvtarUser";
 import StoryView from "./StoryView";
 import { Modal } from "@mui/material";
+import { useFilePicker } from "use-file-picker";
+import {
+  FileSizeValidator,
+  FileTypeValidator,
+} from "use-file-picker/validators";
+import { toast, ToastContainer } from "react-toastify";
+import CaptionAndConfirm from "../addselector/CaptionAndConfirm";
 
 function StoryScrollContainer({ list, onClick }) {
   const scrollRef = useRef(null);
@@ -80,7 +88,7 @@ function StoryScrollContainer({ list, onClick }) {
   };
   const dispatch = useDispatch();
   const { userid } = useSelectorUserState();
-  const { stories, user, userPhoto } = useSelectorUserAction();
+  const { stories, user, userPhoto, personalstories } = useSelectorUserAction();
   useEffect(() => {
     if (!Object.keys(stories).length > 0) {
       const data = {
@@ -93,6 +101,9 @@ function StoryScrollContainer({ list, onClick }) {
       };
       dispatch(storylisttoshow(data));
     }
+    if (!Object.keys(personalstories).length > 0) {
+      dispatch(personalstorylist());
+    }
   }, []);
 
   const [storyopen, setStoryOpen] = useState(false);
@@ -101,20 +112,44 @@ function StoryScrollContainer({ list, onClick }) {
 
   useEffect(() => {
     const storiesall = stories.record;
-    const storyper =
-      storiesall &&
-      storiesall.flatMap((element) =>
-        element.stories.map((item, index) => ({
-          userId: element.userId,
-          userName: element.userName,
-          profilePictureName: element.profilePictureName,
-          index: index + 1,
-          outOf: element.stories.length,
-          ...item,
-        }))
-      );
-    setStorylist(storyper || []);
-  }, [stories]);
+    const ps = personalstories.record;
+
+    const personalStories = ps
+      ? ps.flatMap((element) =>
+          element.stories
+            .slice()
+            .reverse()
+            .map((item, index) => ({
+              userId: element.userId,
+              userName: element.userName,
+              profilePictureName: element.profilePictureName,
+              index: index + 1, // Adjusting index if needed
+              outOf: element.stories.length,
+              ...item,
+            }))
+        )
+      : [];
+
+    const storyper = storiesall
+      ? storiesall.flatMap((element) =>
+          element.stories
+            .slice()
+            .reverse()
+            .map((item, index) => ({
+              userId: element.userId,
+              userName: element.userName,
+              profilePictureName: element.profilePictureName,
+              index: index + 1,
+              outOf: element.stories.length,
+              ...item,
+            }))
+        )
+      : [];
+
+    const combinedStories = [...personalStories, ...storyper];
+
+    setStorylist(combinedStories || []);
+  }, [personalstories, stories]);
 
   function PrevStory() {
     if (storyIndextoshow > 0) {
@@ -130,17 +165,20 @@ function StoryScrollContainer({ list, onClick }) {
 
   function handleStoryClick(userId) {
     const storyIndex = storylist.findIndex(
-      (item) => item.userId === userId && item.isSeen === false
+      (item) =>
+        item.userId.toString() === userId.toString() && item.isSeen === false
+    );
+    const newstoryindex = storylist.findIndex(
+      (item) => item.userId.toString() === userId.toString()
     );
     if (storyIndex !== -1) {
       setStoryIndextoshow(storyIndex);
       setStoryOpen(true);
-    } else {
-      const newstoryindex = storylist.findIndex(
-        (item) => item.userId === userId
-      );
+    } else if (newstoryindex !== -1) {
       setStoryIndextoshow(newstoryindex);
       setStoryOpen(true);
+    } else if (userid === userId) {
+      handlePostClick("Story");
     }
   }
 
@@ -163,13 +201,80 @@ function StoryScrollContainer({ list, onClick }) {
       },
     };
     dispatch(storylisttoshow(data));
+    dispatch(personalstorylist());
   }
+
+  //////////////////  Story //////////////////
+
+  const [postData, setPostData] = useState({ PostType: null, Files: null });
+  const [multiple, setMultiple] = useState(true);
+  const [triggerPicker, setTriggerPicker] = useState(false);
+  const [isSelected, setIsSelected] = useState(false);
+
+  const { openFilePicker, loading, errors } = useFilePicker({
+    multiple: multiple,
+    readAs: "DataURL",
+    accept: ["image/*", "video/*"],
+    onFilesSelected: ({ filesContent }) => {
+      setPostData((prevState) => ({
+        ...prevState,
+        Files: filesContent,
+      }));
+    },
+    validators: [
+      new FileSizeValidator({ maxFileSize: 1 * 1024 * 1024 }),
+      new FileTypeValidator([
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "bmp",
+        "webp",
+        "mp4",
+        "mov",
+        "avi",
+        "mkv",
+        "wmv",
+        "mp3",
+        "wav",
+        "ogg",
+      ]),
+    ],
+  });
+
+  function handlePostClick(value) {
+    setMultiple(value === "Post");
+    setPostData({ PostType: value, Files: null });
+    setIsSelected(false);
+    setTriggerPicker(true);
+  }
+
+  useEffect(() => {
+    if (triggerPicker) {
+      openFilePicker();
+      setTriggerPicker(false);
+    }
+  }, [triggerPicker, multiple, openFilePicker]);
+
+  useEffect(() => {
+    if (postData.Files) {
+      setIsSelected(true);
+    }
+  }, [postData]);
+
+  useEffect(() => {
+    if (errors.length) {
+      toast.error(errors[0].reason);
+    }
+  }, [errors]);
 
   return (
     <div
       style={{ display: "flex", gap: "15px", position: "relative" }}
-      className="w-full p-3"
+      className="w-full p-3 storycontainer"
     >
+      <ToastContainer></ToastContainer>
+
       {/* Model start Here  */}
 
       {storyopen && (
@@ -210,13 +315,22 @@ function StoryScrollContainer({ list, onClick }) {
           <div
             className="flex items-center justify-center rounded-full border"
             style={{ height: "70px", width: "70px" }}
+            onClick={() => handleStoryClick(userid)}
           >
             <AvtarUser
               sx={{
                 height: "100%",
                 width: "100%",
                 aspectRatio: "1",
-                border: "2px solid red",
+                border: `2px solid ${
+                  !!storylist.find(
+                    (item) =>
+                      item.userId.toString() === userid.toString() &&
+                      item.isSeen === false
+                  )
+                    ? "red"
+                    : "gray"
+                }`,
               }}
               userId={user.userId}
               photoName={user.profilePictureName}
@@ -266,6 +380,7 @@ function StoryScrollContainer({ list, onClick }) {
           </button>
         )}
       </div>
+      {isSelected && <CaptionAndConfirm data={postData} />}
     </div>
   );
 }

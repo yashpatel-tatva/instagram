@@ -515,6 +515,48 @@ export const commentonpost = createAsyncThunk(
     }
   }
 );
+export const deletecommentonpost = createAsyncThunk(
+  "user/deletecommentonpost",
+  async (data, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post(
+        `Post/DeletePostComment?commentId=${data}`
+      );
+      if (response.status >= 200 && response.status < 300) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(await response.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        return thunkAPI.rejectWithValue(error.response.data);
+      } else {
+        return thunkAPI.rejectWithValue({ message: error.message });
+      }
+    }
+  }
+);
+export const deletestory = createAsyncThunk(
+  "user/deletestory",
+  async (data, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post(
+        `Story/DeleteStory?storyId=${data}`
+      );
+      if (response.status >= 200 && response.status < 300) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(await response.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        return thunkAPI.rejectWithValue(error.response.data);
+      } else {
+        return thunkAPI.rejectWithValue({ message: error.message });
+      }
+    }
+  }
+);
 
 export const searchbyusername = createAsyncThunk(
   "user/searchbyusername",

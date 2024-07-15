@@ -7,7 +7,6 @@ const AvtarUser = ({ sx = {}, src = "", userId, photoName = "" }) => {
   const [profile, setProfile] = useState(src);
   const dispatch = useDispatch();
   useEffect(() => {
-    console.log(userId, src);
     if (src === "" && userId) {
       const fetchData = async () => {
         const res = await dispatch(

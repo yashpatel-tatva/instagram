@@ -68,7 +68,6 @@ const SideBottomBar = ({ children }) => {
   const [openSearch, setOpenSearch] = React.useState(false);
 
   const toggleSearchDrawer = (newOpen) => () => {
-    console.log(newOpen);
     if (newOpen) setOpenNotification(false);
     setOpenSearch(newOpen);
   };

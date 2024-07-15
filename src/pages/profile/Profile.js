@@ -5,6 +5,9 @@ import { authAction, useSelectorUserState } from "../../redux/slices/AuthSlice";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
+import FilterNoneIcon from "@mui/icons-material/FilterNone";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import {
   folloerorfollowinglist,
   followrequest,
@@ -72,10 +75,6 @@ const Profile = () => {
     followeCount: 0,
     postCount: 0,
   });
-
-  useEffect(() => {
-    console.log(showProfileOf);
-  }, []);
 
   useEffect(() => {
     dispatch(userAction.resetProfileUpdateFlag());
@@ -155,6 +154,8 @@ const Profile = () => {
                     count: element.medias.length,
                     posttype: element.postType,
                     postId: element.postId,
+                    likesCount: element.postLikes.length,
+                    commentCount: element.postComments.length,
                   });
                 });
                 setShowMedia(postList);
@@ -170,7 +171,7 @@ const Profile = () => {
         }
       }
     }
-  }, [value, userid, showProfileOf, dispatch]);
+  }, [value, userid, showProfileOf, dispatch, pffcount]);
 
   useEffect(() => {
     if (showMedia) {
@@ -191,6 +192,8 @@ const Profile = () => {
               res.payload.data.imageBase64,
             count: element.count,
             postId: element.postId,
+            likesCount: element.likesCount,
+            commentCount: element.commentCount,
           };
           setImgList((old) => [...old, img]);
         };
@@ -644,7 +647,7 @@ const Profile = () => {
               </div>
               <div className="flex flex-col items-center">
                 {value !== "Media" ? (
-                  <ImageList cols={3} gap={0}>
+                  <ImageList cols={3} gap={0} key={pffcount.postCount}>
                     {imgList &&
                       imgList.length !== 0 &&
                       imgList.map((item) => (
@@ -663,6 +666,19 @@ const Profile = () => {
                             alt={item.title}
                             loading="lazy"
                           />
+                          {item.count > 1 && (
+                            <div className="absolute top-1 right-1 text-white shadow-lg">
+                              <FilterNoneIcon />
+                            </div>
+                          )}
+                          <div className="absolute flex items-center h-full w-full justify-center opacity-0 hover:backdrop-brightness-50 gap-5 hover:opacity-100 text-white ">
+                            <span>
+                              <ChatBubbleIcon /> {item.commentCount}
+                            </span>
+                            <span>
+                              <FavoriteIcon /> {item.likesCount}
+                            </span>
+                          </div>
                         </ImageListItem>
                       ))}
                   </ImageList>
@@ -782,10 +798,7 @@ const Profile = () => {
       {/* ///openpost//// */}
       {openPost && (
         <Modal open onClose={() => setOpenPost(false)}>
-          <Box
-            sx={{ height: "100%" }}
-            className="flex justify-center items-center"
-          >
+          <div className="flex justify-center items-center h-full">
             <IconButton
               sx={{
                 position: "absolute",
@@ -831,6 +844,7 @@ const Profile = () => {
             )}
             <div className="bg-white w-1/2 md:w-3/4  fm:w-full fm:h-full flex justify-center items-center">
               <PostContainer
+                style={{ maxHeight: "100%" }}
                 key={postToshow.postId}
                 postdata={postToshow}
                 postProfilePhoto={
@@ -839,7 +853,7 @@ const Profile = () => {
                 postUserName={showProfileOf.userName}
               ></PostContainer>
             </div>
-          </Box>
+          </div>
         </Modal>
       )}
     </div>

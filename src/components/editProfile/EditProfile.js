@@ -66,7 +66,6 @@ const EditProfile = () => {
 
   useEffect(() => {
     if (!Object.keys(user).length > 0) {
-      console.log("trye");
       dispatch(getuserdata(userid));
     }
     if (Object.keys(user).length > 0) {
@@ -220,7 +219,6 @@ const EditProfile = () => {
     onSubmit: (values) => {
       values.isPrivate =
         values.isPrivate === "true" || values.isPrivate === true;
-      console.log(values);
       dispatch(updateuserprofile(JSON.stringify(values, null, 2)));
     },
   });

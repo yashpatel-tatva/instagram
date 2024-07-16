@@ -50,6 +50,7 @@ import PostContainer from "../../components/postcontainer/PostContainer";
 import "../profile/Profile.css";
 import AvtarUserwithName from "../../components/avtarofuser/AvtarUserwithName";
 import QRCode from "react-qr-code";
+import AvtarUser from "../../components/avtarofuser/AvtarUser";
 
 const Profile = () => {
   const { userName } = useParams();
@@ -76,6 +77,8 @@ const Profile = () => {
     postCount: 0,
   });
 
+  const [found, setFound] = useState(true);
+
   useEffect(() => {
     dispatch(userAction.resetProfileUpdateFlag());
     if (userName) {
@@ -90,11 +93,15 @@ const Profile = () => {
         };
         if (userName) {
           const res = await dispatch(searchbyusername(formData));
-          const id = res.payload.data.record[0].userId;
-          const userdata = await dispatch(getotheruserdata(id));
-          setShowProfileOf(userdata.payload);
-          const counts = await dispatch(getpffcountofother(id));
-          setShowCounts(counts.payload.data);
+          try {
+            const id = res.payload.data.record[0].userId;
+            const userdata = await dispatch(getotheruserdata(id));
+            setShowProfileOf(userdata.payload);
+            const counts = await dispatch(getpffcountofother(id));
+            setShowCounts(counts.payload.data);
+          } catch {
+            setFound(false);
+          }
         }
       };
       fetch();
@@ -335,10 +342,29 @@ const Profile = () => {
     }
   }
 
+  function opensearch() {
+    document.getElementsByClassName("searchbtn")[0].click();
+  }
+
   return (
     <div className="">
-      {!showProfileOf ||
-      (showProfileOf && !Object.keys(showProfileOf).length > 0) ? (
+      {!found ? (
+        <div className=" w-full flex justify-center items-center">
+          <div className="flex flex-col items-center justify-center">
+            <img
+              className="w-1/2 fm:w-full"
+              alt="user not Found"
+              src="https://static.vecteezy.com/system/resources/previews/005/073/071/original/user-not-found-account-not-register-concept-illustration-flat-design-eps10-modern-graphic-element-for-landing-page-empty-state-ui-infographic-icon-vector.jpg"
+            ></img>
+            <div>
+              <Button variant="contained" onClick={opensearch}>
+                Seach Other
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : !showProfileOf ||
+        (showProfileOf && !Object.keys(showProfileOf).length > 0) ? (
         <ProfileLoader
           className="w-1/5 p-3 md:w-2/5 mt-6 flex justify-center items-center"
           style={{ width: "100%", height: "100%" }}
@@ -348,16 +374,19 @@ const Profile = () => {
           <div className="fm:hidden mt-6 p-3 flex gap-7 border-b-2">
             <div
               className="flex justify-center items-center"
-              style={{ maxWidth: "300px", minWidth: "100px" }}
+              style={{ maxWidth: "150px", minWidth: "100px" }}
             >
-              <div className="w-full flex justify-center items-center">
-                <img
-                  className="rounded-full"
-                  width={"150px"}
-                  style={{ objectFit: "cover", aspectRatio: "1" }}
-                  src={userName ? showProfileOf.profilePic : userPhoto}
-                  alt="profile"
-                ></img>
+              <div className="w-full h-full flex justify-center items-center">
+                <AvtarUser
+                  sx={{
+                    height: "100%",
+                    width: "100%",
+                    aspectRatio: "1",
+                  }}
+                  userId={showProfileOf.userId}
+                  photoName={showProfileOf.profilePictureName}
+                  userName={showProfileOf.userName}
+                ></AvtarUser>
               </div>
             </div>
             <div className="flex-grow flex flex-col justify-between">
@@ -499,13 +528,16 @@ const Profile = () => {
                 style={{ maxWidth: "100px", minWidth: "100px" }}
               >
                 <div className="w-full flex justify-center items-center">
-                  <img
-                    className="rounded-full"
-                    width={"150px"}
-                    style={{ objectFit: "cover", aspectRatio: "1" }}
-                    src={userName ? showProfileOf.profilePic : userPhoto}
-                    alt="profile"
-                  ></img>
+                  <AvtarUser
+                    sx={{
+                      height: "100%",
+                      width: "100%",
+                      aspectRatio: "1",
+                    }}
+                    userId={showProfileOf.userId}
+                    photoName={showProfileOf.profilePictureName}
+                    userName={showProfileOf.userName}
+                  ></AvtarUser>
                 </div>
               </div>
               <div className="flex flex-col justify-center">

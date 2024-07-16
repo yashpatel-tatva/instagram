@@ -160,7 +160,12 @@ const CaptionAndConfirm = (data) => {
           </div>
           <div className="w-1/2 fm:w-full  h-full fm:h-1/2 p-4">
             <div className="flex gap-4 items-center">
-              <AvtarUser userId={user.userId} alt="profile" src={userPhoto} />
+              <AvtarUser
+                userId={user.userId}
+                alt="profile"
+                photoName={user.profilePictureName}
+                userName={user.userName}
+              />
               <span className="font-semibold">{user.userName}</span>
             </div>
             <div className="w-10/12 py-6">

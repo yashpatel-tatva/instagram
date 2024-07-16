@@ -9,7 +9,8 @@ const AvatarGroupThree = ({ data }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const promises = data.map(async (item) => {
+      const limitedData = data.slice().reverse().slice(0, 3);
+      const promises = limitedData.map(async (item) => {
         const res = await dispatch(
           getprofilepic({
             userId: item.userId,
@@ -27,11 +28,15 @@ const AvatarGroupThree = ({ data }) => {
   }, [data, dispatch]);
 
   return (
-    <div>
+    <div className="py-2">
       <AvatarGroup max={3}>
         {profileList.length > 0 &&
           profileList.map((avatarUrl, index) => (
-            <Avatar key={index} src={avatarUrl} />
+            <Avatar
+              sx={{ width: 24, height: 24 }}
+              key={index}
+              src={avatarUrl}
+            />
           ))}
       </AvatarGroup>
     </div>

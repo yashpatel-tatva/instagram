@@ -50,7 +50,6 @@ const StoryView = forwardRef(
           );
           const formdata = new FormData();
           formdata.append("storyId", data.storyId);
-          handleseen();
           dispatch(storyseen(formdata));
 
           restartTimer();
@@ -104,7 +103,6 @@ const StoryView = forwardRef(
         pause();
         setIsPaused(true);
       }
-      console.log(data.storyViewList);
     }
 
     function pauseResumeStory() {
@@ -123,49 +121,17 @@ const StoryView = forwardRef(
         sx={{ height: "100%" }}
         className="flex justify-center items-center"
       >
-        <IconButton
-          sx={{
-            position: "absolute",
-            zIndex: "4",
-            right: "1%",
-            top: "1%",
-            backgroundColor: "white",
-            "&:hover": { backgroundColor: "pink" },
-          }}
-          onClick={handleCloseStoryView}
-        >
-          <CloseIcon />
-        </IconButton>
-        {isNext && (
+        <div className="absolute z-10 right-4 top-4 fm:hidden">
           <IconButton
             sx={{
-              position: "absolute",
-              zIndex: "4",
-              right: "1%",
-              top: "50%",
               backgroundColor: "white",
-              "&:hover": { backgroundColor: "lightcoral" },
+              "&:hover": { backgroundColor: "pink" },
             }}
-            onClick={next}
+            onClick={handleCloseStoryView}
           >
-            <ChevronRightOutlinedIcon />
+            <CloseIcon />
           </IconButton>
-        )}
-        {isPrev && (
-          <IconButton
-            sx={{
-              position: "absolute",
-              zIndex: "4",
-              left: "1%",
-              top: "50%",
-              backgroundColor: "white",
-              "&:hover": { backgroundColor: "lightcoral" },
-            }}
-            onClick={prev}
-          >
-            <ChevronLeftOutlinedIcon />
-          </IconButton>
-        )}
+        </div>
 
         <div className="bg-white h-3/4 w-1/4 xl:w-1/3 md:w-1/2 relative rounded-2xl sm:w-3/4 fm:w-screen fm:h-screen">
           <div
@@ -179,30 +145,49 @@ const StoryView = forwardRef(
                   userId: data.userId,
                   profilePictureName: data.profilePictureName,
                 }}
+                story={false}
                 comment={data.caption ?? " "}
               />
-              {data.userId === user.userId && (
-                <div>
+              <div className="flex">
+                {data.userId === user.userId && (
+                  <>
+                    <div className="">
+                      <IconButton
+                        aria-label="storyView"
+                        size="large"
+                        onClick={() => handleOpenViewList(data.storyId)}
+                      >
+                        {openViewList ? (
+                          <VisibilityOffIcon sx={{ color: "white" }} />
+                        ) : (
+                          <VisibilityIcon sx={{ color: "white" }} />
+                        )}
+                      </IconButton>
+                    </div>
+                    <div className="fm:hidden">
+                      <IconButton
+                        aria-label="delete"
+                        size="large"
+                        onClick={() => deleteStory(data.storyId)}
+                      >
+                        <DeleteIcon sx={{ color: "white" }} />
+                      </IconButton>
+                    </div>
+                  </>
+                )}
+                <div className="fnm:hidden">
                   <IconButton
-                    aria-label="storyView"
                     size="large"
-                    onClick={() => handleOpenViewList(data.storyId)}
+                    sx={{
+                      color: "white",
+                      "&:hover": { color: "white" },
+                    }}
+                    onClick={handleCloseStoryView}
                   >
-                    {openViewList ? (
-                      <VisibilityOffIcon sx={{ color: "white" }} />
-                    ) : (
-                      <VisibilityIcon sx={{ color: "white" }} />
-                    )}
-                  </IconButton>
-                  <IconButton
-                    aria-label="delete"
-                    size="large"
-                    onClick={() => deleteStory(data.storyId)}
-                  >
-                    <DeleteIcon sx={{ color: "white" }} />
+                    <CloseIcon />
                   </IconButton>
                 </div>
-              )}
+              </div>
             </div>
             <Box sx={{ display: "flex", gap: "0.5rem" }}>
               {Array.from({ length: data.outOf }).map((_, i) => (
@@ -256,6 +241,36 @@ const StoryView = forwardRef(
                     <PlayArrowRoundedIcon />
                   </IconButton>
                 )}
+                {isNext && (
+                  <IconButton
+                    sx={{
+                      position: "absolute",
+                      zIndex: "4",
+                      right: "1%",
+                      top: "50%",
+                      backgroundColor: "white",
+                      "&:hover": { backgroundColor: "lightcoral" },
+                    }}
+                    onClick={next}
+                  >
+                    <ChevronRightOutlinedIcon />
+                  </IconButton>
+                )}
+                {isPrev && (
+                  <IconButton
+                    sx={{
+                      position: "absolute",
+                      zIndex: "4",
+                      left: "1%",
+                      top: "50%",
+                      backgroundColor: "white",
+                      "&:hover": { backgroundColor: "lightcoral" },
+                    }}
+                    onClick={prev}
+                  >
+                    <ChevronLeftOutlinedIcon />
+                  </IconButton>
+                )}
               </div>
             )}
             {data.userId === user.userId && (
@@ -264,10 +279,19 @@ const StoryView = forwardRef(
                   openViewList ? "block" : "hidden"
                 } h-2/3 bg-white flex flex-col  border-2 border-t rounded-t-lg rounded-r-lg absolute commentbox overflow-scroll`}
               >
-                <div className="p-2 px-4 border-b-2 border-t-2">
+                <div className="p-2 px-4 border-b-2 border-t-2 flex items-center justify-between w-full">
                   <span>
                     <VisibilityIcon /> {data.storyViewList.length}
                   </span>
+                  <div className="fnm:hidden">
+                    <IconButton
+                      aria-label="delete"
+                      size="large"
+                      onClick={() => deleteStory(data.storyId)}
+                    >
+                      <DeleteIcon sx={{ color: "black" }} />
+                    </IconButton>
+                  </div>
                 </div>
                 {data.storyViewList &&
                   data.storyViewList.length > 0 &&

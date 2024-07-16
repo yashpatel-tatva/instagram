@@ -124,7 +124,7 @@ export const Home = () => {
           ></Notificaion>
         </div>
       </Drawer>
-      <div className="flex sticky top-0 fm:top-14 bg-white z-20 pb-3">
+      <div className="flex fnm:sticky top-0 fm:top-14 bg-white z-20 pb-3">
         <div className="flex flex-grow  w-7/12">
           <StoryScrollContainer />
         </div>

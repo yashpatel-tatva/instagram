@@ -111,7 +111,7 @@ const SideBottomBar = ({ children }) => {
               <div onClick={toggleSearchDrawer(true)}>
                 <div
                   role="button"
-                  className={`flex gap-2 items-center ${
+                  className={`flex searchbtn gap-2 items-center ${
                     openSearch ? "text-blue-500" : "text-gray-500"
                   }`}
                 >

@@ -26,7 +26,7 @@ function StoryScrollContainer({ list, onClick }) {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [showLeftButton, setShowLeftButton] = useState(false);
-  const [showRightButton, setShowRightButton] = useState(true);
+  const [showRightButton, setShowRightButton] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,6 +41,7 @@ function StoryScrollContainer({ list, onClick }) {
 
     if (scrollRef.current) {
       scrollRef.current.addEventListener("scroll", handleScroll);
+      handleScroll();
     }
 
     return () => {
@@ -183,11 +184,7 @@ function StoryScrollContainer({ list, onClick }) {
   }
 
   function handleseen(storyId) {
-    // setStorylist((prevStorylist) =>
-    //   prevStorylist.map((story) =>
-    //     story.storyId === storyId ? { ...story, isSeen: true } : story
-    //   )
-    // );
+    console.log("story seen :", storyId);
   }
 
   function handleCloseStoryView() {
@@ -267,7 +264,12 @@ function StoryScrollContainer({ list, onClick }) {
       toast.error(errors[0].reason);
     }
   }, [errors]);
-
+  useEffect(() => {
+    const { current } = scrollRef;
+    if (current) {
+      setShowRightButton(current.scrollWidth > current.clientWidth);
+    }
+  }, [storylist]);
   return (
     <div
       style={{ display: "flex", gap: "15px", position: "relative" }}
@@ -311,7 +313,10 @@ function StoryScrollContainer({ list, onClick }) {
             <ChevronLeftOutlinedIcon color="white" fontSize="large" />
           </button>
         )}
-        <div className="flex flex-col justify-center items-center">
+        <div
+          className="flex flex-col justify-center items-center"
+          style={{ width: "80px" }}
+        >
           <div
             className="flex items-center justify-center rounded-full border"
             style={{ height: "70px", width: "70px" }}
@@ -332,11 +337,15 @@ function StoryScrollContainer({ list, onClick }) {
                     : "gray"
                 }`,
               }}
+              story={false}
               userId={user.userId}
               photoName={user.profilePictureName}
+              userName={user.userName}
             ></AvtarUser>
           </div>
-          <div className="text-sm">{user.userName}</div>
+          <div className="text-sm w-full whitespace-nowrap overflow-hidden text-ellipsis">
+            {user.userName}
+          </div>
         </div>
         {stories.record &&
           stories.record.length > 0 &&
@@ -345,6 +354,7 @@ function StoryScrollContainer({ list, onClick }) {
               <div
                 key={index}
                 className="flex flex-col justify-center items-center"
+                style={{ width: "80px" }}
               >
                 <div
                   className="flex items-center justify-center rounded-full border"
@@ -356,17 +366,15 @@ function StoryScrollContainer({ list, onClick }) {
                       height: "100%",
                       width: "100%",
                       aspectRatio: "1",
-                      border: `2px solid ${
-                        element.stories.find((item) => item.isSeen === false)
-                          ? "red"
-                          : "gray"
-                      }`,
                     }}
+                    story={false}
                     userId={element.userId}
                     photoName={element.profilePictureName}
                   ></AvtarUser>
                 </div>
-                <div className="text-sm">{element.userName}</div>
+                <div className="text-sm w-full whitespace-nowrap overflow-hidden text-ellipsis">
+                  {element.userName}
+                </div>
               </div>
             );
           })}

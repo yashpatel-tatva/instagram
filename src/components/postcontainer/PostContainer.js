@@ -233,7 +233,7 @@ const PostContainer = ({ postdata, postUserName }) => {
   return (
     <div
       value={updaterender}
-      className=" w-8/12 fnm:relative md:w-9/12 fm:w-full border-b-2 fnm:border-0"
+      className=" w-8/12 fnm:relative md:w-9/12 fm:w-full border-b-2 "
     >
       <div className="flex justify-between items-center">
         <div className="flex gap-3 items-center">
@@ -335,8 +335,8 @@ const PostContainer = ({ postdata, postUserName }) => {
           )}
         </div>
       </div>
-      <div className="flex justify-between py-2">
-        <Stack spacing={2} direction={"row"} sx={{ width: "fit-content" }}>
+      <Stack direction={"row"} justifyContent={"space-between"} spacing={2}>
+        <Stack direction={"row"} sx={{ width: "fit-content" }}>
           <IconButton onClick={handleLike}>
             <img
               src={isLike ? assets.likedRedIcon : assets.notificationIcon}
@@ -354,15 +354,17 @@ const PostContainer = ({ postdata, postUserName }) => {
         <IconButton>
           <img src={assets.bookmarkIcon} alt="like" width={"30px"}></img>
         </IconButton>
-      </div>
-      <div role="button">
-        <div
-          onClick={() => handleListOpen("Likes")}
-          className="flex gap-3 items-center"
-        >
-          <AvtarGroupthree data={data.postLikes} /> {likeCount} likes
+      </Stack>
+      {likeCount !== 0 && (
+        <div role="button">
+          <div
+            onClick={() => handleListOpen("Likes")}
+            className="flex gap-3 items-center"
+          >
+            <AvtarGroupthree data={data.postLikes} /> {likeCount} likes
+          </div>
         </div>
-      </div>
+      )}
       <div>
         <span>{postUserName}</span>
         <EllipsisTextUptoTwo text={data.caption}></EllipsisTextUptoTwo>

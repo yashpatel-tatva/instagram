@@ -10,6 +10,7 @@ const Request = ({ data, onClick }) => {
       <AvtarUser
         userId={data.user.userId}
         photoName={data.user.profilePictureName}
+        userName={data.user.userName}
       />
       <div>{data.user.userName} requested to follow you..</div>
       <div className="flex gap-2">

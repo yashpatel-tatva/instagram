@@ -17,6 +17,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useTimer } from "react-timer-hook";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
+import ReactPlayer from "react-player";
 
 const StoryView = forwardRef(
   (
@@ -30,6 +31,7 @@ const StoryView = forwardRef(
 
     async function deleteStory(storyId) {
       await dispatch(deletestory(storyId));
+      handleCloseStoryView();
       await dispatch(personalstorylist());
     }
 
@@ -107,6 +109,7 @@ const StoryView = forwardRef(
 
     function pauseResumeStory() {
       if (isRunning) {
+        console.log(isRunning, isPaused);
         pause();
         setIsPaused(true);
       } else {
@@ -114,6 +117,21 @@ const StoryView = forwardRef(
         setIsPaused(false);
       }
     }
+    const videoEl = useRef(null);
+
+    const video = videoEl.current;
+
+    useEffect(() => {
+      if (data.storyType === "Video") {
+        if (video) {
+          if (isPaused) {
+            video.pause();
+          } else {
+            video.play();
+          }
+        }
+      }
+    }, [isPaused]);
 
     return (
       <Box
@@ -212,12 +230,12 @@ const StoryView = forwardRef(
             </Box>
           </div>
           <div className="absolute  h-full w-full top-0 z-0">
-            {data.storyType === "Image" && (
-              <div
-                className={`${
-                  openViewList ? "h-1/3" : "h-full w-full"
-                }  flex justify-center items-center transition-all relative`}
-              >
+            <div
+              className={`${
+                openViewList ? "h-1/3" : "h-full w-full"
+              }  flex justify-center items-center transition-all relative`}
+            >
+              {data.storyType === "Image" && (
                 <img
                   src={file}
                   className={`${
@@ -226,53 +244,85 @@ const StoryView = forwardRef(
                   alt={data.caption}
                   onClick={pauseResumeStory}
                 />
-                {isPaused && (
-                  <IconButton
+              )}
+              {data.storyType === "Video" && (
+                <div
+                  onClick={pauseResumeStory}
+                  className="h-full w-full flex justify-center items-center"
+                >
+                  <video
+                    poster={file}
+                    src={file}
+                    autoPlay
+                    ref={videoEl}
+                    loop
+                    className={`${
+                      openViewList ? "w-auto" : " w-full"
+                    } rounded-2xl max-h-full transition-all`}
+                    alt={data.caption}
                     onClick={pauseResumeStory}
-                    sx={{
-                      position: "absolute",
-                      zIndex: "4",
-                      top: "50%",
-                      backgroundColor: "white",
-                      "&:hover": { backgroundColor: "pink" },
+                  />
+                  {/* <ReactPlayer
+                    url={file}
+                    loop
+                    playing={!isPaused}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "1rem",
+                      maxHeight: "100%",
+                      transition: "all 0.2s",
                     }}
-                    size="large"
-                  >
-                    <PlayArrowRoundedIcon />
-                  </IconButton>
-                )}
-                {isNext && (
-                  <IconButton
-                    sx={{
-                      position: "absolute",
-                      zIndex: "4",
-                      right: "1%",
-                      top: "50%",
-                      backgroundColor: "white",
-                      "&:hover": { backgroundColor: "lightcoral" },
-                    }}
-                    onClick={next}
-                  >
-                    <ChevronRightOutlinedIcon />
-                  </IconButton>
-                )}
-                {isPrev && (
-                  <IconButton
-                    sx={{
-                      position: "absolute",
-                      zIndex: "4",
-                      left: "1%",
-                      top: "50%",
-                      backgroundColor: "white",
-                      "&:hover": { backgroundColor: "lightcoral" },
-                    }}
-                    onClick={prev}
-                  >
-                    <ChevronLeftOutlinedIcon />
-                  </IconButton>
-                )}
-              </div>
-            )}
+                    alt={data.caption}
+                  /> */}
+                </div>
+              )}
+              {isPaused && (
+                <IconButton
+                  onClick={pauseResumeStory}
+                  sx={{
+                    position: "absolute",
+                    zIndex: "4",
+                    top: "50%",
+                    backgroundColor: "white",
+                    "&:hover": { backgroundColor: "pink" },
+                  }}
+                  size="large"
+                >
+                  <PlayArrowRoundedIcon />
+                </IconButton>
+              )}
+              {isNext && (
+                <IconButton
+                  sx={{
+                    position: "absolute",
+                    zIndex: "4",
+                    right: "1%",
+                    top: "50%",
+                    backgroundColor: "white",
+                    "&:hover": { backgroundColor: "lightcoral" },
+                  }}
+                  onClick={next}
+                >
+                  <ChevronRightOutlinedIcon />
+                </IconButton>
+              )}
+              {isPrev && (
+                <IconButton
+                  sx={{
+                    position: "absolute",
+                    zIndex: "4",
+                    left: "1%",
+                    top: "50%",
+                    backgroundColor: "white",
+                    "&:hover": { backgroundColor: "lightcoral" },
+                  }}
+                  onClick={prev}
+                >
+                  <ChevronLeftOutlinedIcon />
+                </IconButton>
+              )}
+            </div>
             {data.userId === user.userId && (
               <div
                 className={`${
@@ -287,7 +337,9 @@ const StoryView = forwardRef(
                     <IconButton
                       aria-label="delete"
                       size="large"
-                      onClick={() => deleteStory(data.storyId)}
+                      onClick={() => {
+                        deleteStory(data.storyId);
+                      }}
                     >
                       <DeleteIcon sx={{ color: "black" }} />
                     </IconButton>

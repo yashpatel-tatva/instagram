@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import {
   getmediafromname,
@@ -39,11 +39,20 @@ const Explore = () => {
   const [isNext, setIsNext] = useState(false);
   const [isPrev, setIsPrev] = useState(false);
 
+  const observer = useRef();
+
   // Fetch posts on page number change
   useEffect(() => {
     const fetchPosts = async () => {
       setIsPostLoader(true);
-      const data = { pageNumber: pageNumberPost, pageSize: 9 };
+      const data = {
+        pageNumber: pageNumberPost,
+        pageSize: 9,
+        searchName: "",
+        model: {
+          postType: null,
+        },
+      };
       const res = await dispatch(postfeedlist(data));
       const newPosts = res.payload.data.record;
 
@@ -110,7 +119,25 @@ const Explore = () => {
     setPostToShow(postfeedList[postindex]);
   }, [postfeedList, postindex]);
 
-  const showMorePost = () => setPageNumberPost((n) => n + 1);
+  const loadMorePosts = useCallback(() => {
+    setIsPostLoader(true);
+    setPageNumberPost((prev) => prev + 1);
+  }, []);
+
+  const lastPostElementRef = useCallback(
+    (node) => {
+      if (isSPostLoader) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && isMoreSPost) {
+          loadMorePosts();
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [isSPostLoader, isMoreSPost, loadMorePosts]
+  );
+
   const next = () =>
     postindex < postfeedList.length - 1 && setPostIndex((n) => n + 1);
   const prev = () => postindex > 0 && setPostIndex((n) => n - 1);
@@ -118,41 +145,74 @@ const Explore = () => {
   return (
     <div>
       <ImageList cols={3} gap={0}>
-        {imgList.map((item) => (
-          <ImageListItem
-            key={item.postId}
-            onClick={() => handlePostClick(item.postId)}
-          >
-            <video
-              poster={item.src}
-              autoPlay
-              loop
-              className="imgvideolist h-full w-full"
-              src={item.src}
-              alt={item.title}
-              loading="lazy"
-            />
-            {item.count > 1 && (
-              <div className="absolute top-1 right-1 text-white shadow-lg">
-                <FilterNoneIcon />
-              </div>
-            )}
-            <div className="absolute flex items-center h-full w-full justify-center opacity-0 hover:backdrop-brightness-50 gap-5 hover:opacity-100 text-white">
-              <span>
-                <ChatBubbleIcon /> {item.commentCount}
-              </span>
-              <span>
-                <FavoriteIcon /> {item.likesCount}
-              </span>
-            </div>
-          </ImageListItem>
-        ))}
+        {imgList.map((item, index) => {
+          if (imgList.length === index + 1) {
+            return (
+              <ImageListItem
+                key={item.postId}
+                ref={lastPostElementRef}
+                onClick={() => handlePostClick(item.postId)}
+              >
+                <video
+                  poster={item.src}
+                  autoPlay
+                  loop
+                  className="imgvideolist h-full w-full"
+                  src={item.src}
+                  alt={item.title}
+                  loading="lazy"
+                />
+                {item.count > 1 && (
+                  <div className="absolute top-1 right-1 text-white shadow-lg">
+                    <FilterNoneIcon />
+                  </div>
+                )}
+                <div className="absolute flex items-center h-full w-full justify-center opacity-0 hover:backdrop-brightness-50 gap-5 hover:opacity-100 text-white">
+                  <span>
+                    <ChatBubbleIcon /> {item.commentCount}
+                  </span>
+                  <span>
+                    <FavoriteIcon /> {item.likesCount}
+                  </span>
+                </div>
+              </ImageListItem>
+            );
+          } else {
+            return (
+              <ImageListItem
+                key={item.postId}
+                onClick={() => handlePostClick(item.postId)}
+              >
+                <video
+                  poster={item.src}
+                  autoPlay
+                  loop
+                  className="imgvideolist h-full w-full"
+                  src={item.src}
+                  alt={item.title}
+                  loading="lazy"
+                />
+                {item.count > 1 && (
+                  <div className="absolute top-1 right-1 text-white shadow-lg">
+                    <FilterNoneIcon />
+                  </div>
+                )}
+                <div className="absolute flex items-center h-full w-full justify-center opacity-0 hover:backdrop-brightness-50 gap-5 hover:opacity-100 text-white">
+                  <span>
+                    <ChatBubbleIcon /> {item.commentCount}
+                  </span>
+                  <span>
+                    <FavoriteIcon /> {item.likesCount}
+                  </span>
+                </div>
+              </ImageListItem>
+            );
+          }
+        })}
       </ImageList>
-      {isMoreSPost && (
-        <div className="text-center p-4" onClick={showMorePost}>
-          <p role="button" className="text-cyan-600 p-3">
-            {isSPostLoader ? <CircularProgress /> : "Load More"}
-          </p>
+      {isSPostLoader && (
+        <div className="text-center p-4">
+          <CircularProgress />
         </div>
       )}
 
@@ -202,11 +262,12 @@ const Explore = () => {
                 <ChevronLeftOutlinedIcon />
               </IconButton>
             )}
-            <div className="bg-white w-1/2 md:w-3/4 fm:w-full fm:h-full flex justify-center items-center">
+            <div className=" w-1/2 md:w-3/4 fm:w-full fm:h-full flex justify-center items-center">
               <PostContainer
                 style={{ maxHeight: "100%" }}
                 key={postToshow.postId}
                 postdata={postToshow}
+                maxHeight={"90vh"}
               />
             </div>
           </div>

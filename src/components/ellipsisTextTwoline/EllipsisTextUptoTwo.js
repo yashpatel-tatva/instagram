@@ -4,16 +4,32 @@ import LinesEllipsis from "react-lines-ellipsis";
 
 const EllipsisTextUptoTwo = ({ text }) => {
   const [expanded, setExpanded] = useState(false);
-  const [needsTruncation, setNeedsTruncation] = useState(false);
-  const textRef = useRef(null);
-  const ellipsisRef = useRef(null);
+  const [needsTruncation, setNeedsTruncation] = useState(true);
+  const tempRef = useRef(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
-    if (textRef.current && ellipsisRef.current && text) {
-      // Compare the height of the full text and the truncated text
-      setNeedsTruncation(
-        textRef.current.clientHeight > ellipsisRef.current.clientHeight
-      );
+    if (tempRef.current && containerRef.current && text) {
+      // Clear any previous measurements
+      containerRef.current.innerHTML = "";
+
+      // Create a temporary span element to measure text
+      const tempElement = document.createElement("span");
+      tempElement.style.whiteSpace = "normal";
+      tempElement.style.display = "inline";
+      tempElement.style.visibility = "hidden";
+      tempElement.innerHTML = text;
+      containerRef.current.appendChild(tempElement);
+
+      // Compare heights
+      const needsTruncate =
+        tempElement.offsetHeight > containerRef.current.offsetHeight;
+
+      // Clean up
+      containerRef.current.innerHTML = "";
+
+      // Update state
+      setNeedsTruncation(needsTruncate);
     }
   }, [text]);
 
@@ -22,16 +38,21 @@ const EllipsisTextUptoTwo = ({ text }) => {
   }
 
   return (
-    <div>
+    <div ref={containerRef}>
       {expanded || !needsTruncation ? (
-        <div ref={textRef}>
+        <>
           {text}
-          {needsTruncation && (
-            <button onClick={() => setExpanded(false)}>Show less</button>
-          )}
-        </div>
+          {/* {needsTruncation && (
+            <button
+              onClick={() => setExpanded(false)}
+              className="font-semibold text-slate-600 ps-14"
+            >
+              Show less
+            </button>
+          )} */}
+        </>
       ) : (
-        <div ref={ellipsisRef}>
+        <>
           <LinesEllipsis
             text={text}
             maxLine={2}
@@ -40,9 +61,14 @@ const EllipsisTextUptoTwo = ({ text }) => {
             basedOn="letters"
           />
           {needsTruncation && (
-            <button onClick={() => setExpanded(true)}>Show more</button>
+            <button
+              onClick={() => setExpanded(true)}
+              className="font-semibold text-slate-600 "
+            >
+              Show more
+            </button>
           )}
-        </div>
+        </>
       )}
     </div>
   );

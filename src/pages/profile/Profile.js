@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import CloseIcon from "@mui/icons-material/Close";
 import { authAction, useSelectorUserState } from "../../redux/slices/AuthSlice";
@@ -248,6 +248,7 @@ const Profile = () => {
   const [listName, setListName] = useState();
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
+  const [listloader, setListLoader] = useState(false);
 
   const handleListOpen = async (value) => {
     if (!userName || !showProfileOf.isPrivate || showProfileOf.isFollowing) {
@@ -274,7 +275,7 @@ const Profile = () => {
     setOpenQR(false);
   };
 
-  const handleLoadMore = async () => {
+  const handleLoadMore = useCallback(async () => {
     const payload = {
       pageNumber: pageNumber,
       pageSize: 10,
@@ -288,8 +289,25 @@ const Profile = () => {
     setListShow((prevList) => [...prevList, ...res.payload.data.record]);
     setHasMore(res.payload.data.record.length === 10);
     setPageNumber(pageNumber + 1);
-  };
+  });
 
+  const observer = useRef();
+
+  const lastPostElementRef = useCallback(
+    (node) => {
+      if (listloader) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          handleLoadMore();
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [listloader, hasMore, handleLoadMore]
+  );
+
+  ////share
   const [openQR, setOpenQR] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -804,16 +822,32 @@ const Profile = () => {
               className="overflow-scroll flex flex-col gap-3"
               style={{ maxHeight: "50vh" }}
             >
-              {listShow.map((element) => {
-                return (
-                  <div className="flex justify-between" key={element.userId}>
-                    <AvtarUserwithName
-                      data={element}
+              {listShow.map((element, index) => {
+                if (listShow.length === index + 1) {
+                  return (
+                    <div
+                      className="flex justify-between"
                       key={element.userId}
-                      onClick={handleClose}
-                    />
-                  </div>
-                );
+                      ref={lastPostElementRef}
+                    >
+                      <AvtarUserwithName
+                        data={element}
+                        key={element.userId}
+                        onClick={handleClose}
+                      />
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div className="flex justify-between" key={element.userId}>
+                      <AvtarUserwithName
+                        data={element}
+                        key={element.userId}
+                        onClick={handleClose}
+                      />
+                    </div>
+                  );
+                }
               })}
               {hasMore && (
                 <Button onClick={handleLoadMore} disabled={!hasMore}>
@@ -874,7 +908,7 @@ const Profile = () => {
                 <ChevronLeftOutlinedIcon />
               </IconButton>
             )}
-            <div className="bg-white w-1/2 md:w-3/4  fm:w-full fm:h-full flex justify-center items-center">
+            <div className=" w-1/2 md:w-3/4  fm:w-full fm:h-full flex justify-center items-center">
               <PostContainer
                 style={{ maxHeight: "100%" }}
                 key={postToshow.postId}
@@ -883,6 +917,8 @@ const Profile = () => {
                   userName ? showProfileOf.profilePic : userPhoto
                 }
                 postUserName={showProfileOf.userName}
+                setOpenPost={() => setOpenPost(false)}
+                maxHeight={"90vh"}
               ></PostContainer>
             </div>
           </div>

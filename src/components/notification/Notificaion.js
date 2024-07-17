@@ -1,5 +1,5 @@
 import { IconButton, CircularProgress, Stack, Modal } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import { useDispatch } from "react-redux";
 import { useSelectorUserState } from "../../redux/slices/AuthSlice";
@@ -29,6 +29,8 @@ const Notificaion = ({ closeDrawer }) => {
 
   const [isMoreNotification, setIsMoreNotification] = useState(false);
   const [isNotificationLoader, setIsNotificationLoader] = useState(true);
+
+  const observer = useRef();
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -71,9 +73,23 @@ const Notificaion = ({ closeDrawer }) => {
     setPageNumberRequest((prev) => prev + 1);
   };
 
-  const showMoreNotifications = () => {
+  const loadMoreNotifications = useCallback(() => {
     setPageNumberNotification((prev) => prev + 1);
-  };
+  }, []);
+
+  const lastNotificationElementRef = useCallback(
+    (node) => {
+      if (isNotificationLoader) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && isMoreNotification) {
+          loadMoreNotifications();
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [isNotificationLoader, isMoreNotification, loadMoreNotifications]
+  );
 
   const handleAcceptDecline = async (requestId, value) => {
     const data = {
@@ -145,26 +161,42 @@ const Notificaion = ({ closeDrawer }) => {
         <div>
           {notiList && notiList.length > 0 ? (
             <div className="overflow-scroll h-full">
-              {notiList.map((element) => (
-                <AvtarUserwithName
-                  key={element.requestId}
-                  data={{
-                    userName: element.userName,
-                    userId: element.userId,
-                    profilePictureName: element.profileName,
-                  }}
-                  comment={element.message}
-                  onClick={() => handleClick(element)}
-                />
-              ))}
-              {isMoreNotification && (
-                <div
-                  className="text-center p-4"
-                  onClick={showMoreNotifications}
-                >
-                  <p role="button" className="text-cyan-600 p-3">
-                    {isNotificationLoader ? <CircularProgress /> : "Show More"}
-                  </p>
+              {notiList.map((element, index) => {
+                if (notiList.length === index + 1) {
+                  return (
+                    <div
+                      ref={lastNotificationElementRef}
+                      key={element.requestId}
+                    >
+                      <AvtarUserwithName
+                        data={{
+                          userName: element.userName,
+                          userId: element.userId,
+                          profilePictureName: element.profileName,
+                        }}
+                        comment={element.message}
+                        onClick={() => handleClick(element)}
+                      />
+                    </div>
+                  );
+                } else {
+                  return (
+                    <AvtarUserwithName
+                      key={element.requestId}
+                      data={{
+                        userName: element.userName,
+                        userId: element.userId,
+                        profilePictureName: element.profileName,
+                      }}
+                      comment={element.message}
+                      onClick={() => handleClick(element)}
+                    />
+                  );
+                }
+              })}
+              {isNotificationLoader && (
+                <div className="text-center p-4">
+                  <CircularProgress />
                 </div>
               )}
             </div>

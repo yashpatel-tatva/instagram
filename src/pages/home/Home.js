@@ -3,7 +3,7 @@ import "../../App.css";
 import instaTextLogo from "../../assets/img/png/instaTextLogo.png";
 import { assets } from "../../constants/Assets";
 import StoryScrollContainer from "../../components/storyscrollContainer/StoryScrollContainer";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import AddSelectPopUp from "../../components/addselector/AddSelectPopUp";
 import Notificaion from "../../components/notification/Notificaion";
 import { useDispatch } from "react-redux";
@@ -38,6 +38,8 @@ export const Home = () => {
   const [isSPostLoader, setIsPostLoader] = useState(true);
   const [pageNumberPost, setPageNumberPost] = useState(1);
 
+  const observer = useRef();
+
   useEffect(() => {
     setIsSugestionLoader(true);
     const data = {
@@ -59,11 +61,16 @@ export const Home = () => {
   function showmoreSugg() {
     setPageNumberSuggestion((n) => n + 1);
   }
+
   useEffect(() => {
     setIsPostLoader(true);
     const data = {
       pageNumber: pageNumberPost,
       pageSize: 6,
+      searchName: "",
+      model: {
+        postType: "",
+      },
     };
     const fetch = async () => {
       const res = await dispatch(postfeedlist(data));
@@ -72,11 +79,25 @@ export const Home = () => {
       setIsPostLoader(false);
     };
     fetch();
-  }, [pageNumberPost]);
+  }, [pageNumberPost, dispatch]);
 
-  function showmorePost() {
+  const loadMorePosts = useCallback(() => {
     setPageNumberPost((n) => n + 1);
-  }
+  }, []);
+
+  const lastPostElementRef = useCallback(
+    (node) => {
+      if (isSPostLoader) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && isMoreSPost) {
+          loadMorePosts();
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [isSPostLoader, isMoreSPost, loadMorePosts]
+  );
 
   return (
     <div>
@@ -133,8 +154,8 @@ export const Home = () => {
         </div>
         <div className="formobile border-b-2"></div>
       </div>
-      <div className="flex">
-        <div className="flex justify-center items-start flex-grow">
+      <div className="flex w-full">
+        <div className="flex justify-center items-start w-9/12 lg:w-full">
           <Stack
             sx={{ width: "100%" }}
             justifyContent={"center"}
@@ -142,17 +163,29 @@ export const Home = () => {
           >
             {postfeedList &&
               postfeedList.length > 0 &&
-              postfeedList.map((post) => (
-                <PostContainer
-                  key={post.postId}
-                  postdata={post}
-                ></PostContainer>
-              ))}
-            {isMoreSPost && (
-              <div className="text-center p-4" onClick={showmorePost}>
-                <p role="button" className="text-cyan-600 p-3">
-                  {isSPostLoader ? <CircularProgress /> : "Load More"}
-                </p>
+              postfeedList.map((post, index) => {
+                if (postfeedList.length === index + 1) {
+                  return (
+                    <div
+                      className="h-full w-full flex justify-center items-center"
+                      ref={lastPostElementRef}
+                      key={post.postId}
+                    >
+                      <PostContainer postdata={post}></PostContainer>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <PostContainer
+                      key={post.postId}
+                      postdata={post}
+                    ></PostContainer>
+                  );
+                }
+              })}
+            {isSPostLoader && (
+              <div className="text-center p-4">
+                <CircularProgress />
               </div>
             )}
           </Stack>
@@ -189,3 +222,5 @@ export const Home = () => {
     </div>
   );
 };
+
+export default Home;

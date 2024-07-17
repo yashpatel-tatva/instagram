@@ -9,7 +9,7 @@ import {
   getpostfollowerfollowingcount,
 } from "../../redux/slices/UserActionSlice";
 
-const AvtarUserwithFollowbtn = ({ data, onclick, setResult }) => {
+const AvtarUserwithFollowbtn = ({ data, onclick, setResult, followclass }) => {
   const { userid } = useSelectorUserState();
   const dispatch = useDispatch();
   const [loader, setLoadrt] = useState(false);
@@ -31,14 +31,18 @@ const AvtarUserwithFollowbtn = ({ data, onclick, setResult }) => {
     setLoadrt(false);
   }
   return (
-    <div className="flex justify-between px-3">
-      <AvtarUserwithName onClick={onclick} data={data}></AvtarUserwithName>
+    <div className="flex justify-between ">
+      <AvtarUserwithName
+        onClick={onclick}
+        data={{ ...data, name: "NoNeedName" }}
+      ></AvtarUserwithName>
       <LoadingButton
         loading={loader}
         variant="text"
         disabled={loader}
         onClick={() => handleFollowClick(data.userId)}
         size="small"
+        sx={followclass}
       >
         {data.isFollowing ? (
           <>Following</>

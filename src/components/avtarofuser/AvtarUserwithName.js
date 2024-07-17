@@ -27,15 +27,17 @@ const AvtarUserwithName = ({ data, onClick, comment = "", story = true }) => {
       >
         <div>
           <div className="text-lg font-semibold">{data.userName}</div>
-          <div>
-            {comment !== "" ? (
-              <span>{comment}</span>
-            ) : data.name ? (
-              data.name
-            ) : (
-              data.userName
-            )}
-          </div>
+          {data.name !== "NoNeedName" && (
+            <div>
+              {comment !== "" ? (
+                <span>{comment}</span>
+              ) : data.name ? (
+                data.name
+              ) : (
+                data.userName
+              )}
+            </div>
+          )}
         </div>
       </Link>
     </div>

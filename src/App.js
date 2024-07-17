@@ -26,22 +26,22 @@ function App() {
   }, [dispatch]);
   const { userid } = useSelectorUserState();
 
-  // useEffect(() => {
-  //   const myTask = () => {
-  //     const data = {
-  //       pageNumber: 1,
-  //       pageSize: 100,
-  //       searchName: "",
-  //       model: {
-  //         userId: userid,
-  //       },
-  //     };
-  //     dispatch(storylisttoshow(data));
-  //   };
-  //   myTask();
-  //   const intervalId = setInterval(myTask, 20000);
-  //   return () => clearInterval(intervalId);
-  // }, []);
+  useEffect(() => {
+    const myTask = () => {
+      const data = {
+        pageNumber: 1,
+        pageSize: 100,
+        searchName: "",
+        model: {
+          userId: userid,
+        },
+      };
+      dispatch(storylisttoshow(data));
+    };
+    myTask();
+    const intervalId = setInterval(myTask, 20000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   const { isLoggedIn } = useSelectorUserState();
   const token = localStorage.getItem("token");

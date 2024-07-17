@@ -31,13 +31,9 @@ import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import AvtarUserwithName from "../avtarofuser/AvtarUserwithName";
 import AvatarGroup from "@mui/material/AvatarGroup";
 import AvtarGroupthree from "../avtarofuser/AvtarGroupthree";
+import AvtarUserwithFollowbtn from "../avtarofuser/AvtarUserwithFollowbtn";
 
-const PostContainer = ({
-  postdata,
-  postUserName,
-  setOpenPost = () => {},
-  maxHeight,
-}) => {
+const ReelContainer = ({ postdata, postUserName }) => {
   const dispatch = useDispatch();
   const [data, setData] = useState(postdata);
   const { user, updaterender } = useSelectorUserAction();
@@ -123,10 +119,9 @@ const PostContainer = ({
   const [isDeleted, setIsDeleted] = useState(false);
 
   async function handleDeletePost() {
-    await dispatch(deletepost(data.postId));
-    setOpenPost(false);
-    dispatch(getpostfollowerfollowingcount(data.userId));
     setIsDeleted(true);
+    await dispatch(deletepost(data.postId));
+    dispatch(getpostfollowerfollowingcount(data.userId));
   }
 
   async function handleLike() {
@@ -239,50 +234,9 @@ const PostContainer = ({
   return (
     <div
       value={updaterender}
-      className="w-8/12 fnm:relative md:w-9/12 fm:w-full border-b-2 bg-white overflow-scroll"
-      style={maxHeight && { maxHeight: maxHeight }}
+      className=" w-8/12 fnm:relative md:w-9/12 fm:w-full border-b-2"
     >
-      <div className="flex justify-between items-center">
-        <div className="flex gap-3 items-center">
-          <div
-            role="button"
-            className="flex gap-2 items-center py-2"
-            style={{ width: "fit-content" }}
-          >
-            <AvtarUserwithName
-              data={{
-                userName: data.userName,
-                userId: data.userId,
-                profilePictureName: data.profilePhotoName,
-              }}
-              comment={data.location ?? " "}
-              alt=""
-            />
-          </div>
-        </div>
-        <div>
-          {postUserName === user.userName && (
-            <PopupState variant="popover" popupId="setting">
-              {(popupState) => (
-                <React.Fragment>
-                  <IconButton variant="contained" {...bindTrigger(popupState)}>
-                    <MoreHorizIcon />
-                  </IconButton>
-                  <Menu {...bindMenu(popupState)}>
-                    <MenuItem
-                      className="text-red-500"
-                      onClick={handleDeletePost}
-                    >
-                      Delete
-                    </MenuItem>
-                  </Menu>
-                </React.Fragment>
-              )}
-            </PopupState>
-          )}
-        </div>
-      </div>
-      <div className="relative">
+      <div className="relative flex justify-center">
         {imgList && imgList.length !== 0 && imgList.length !== 1 && (
           <div className="absolute z-10 right-1 top-1">
             <div className="bg-black p-1 text-white rounded-full z-10">
@@ -314,7 +268,100 @@ const PostContainer = ({
             </Box>
           </div>
         )}
-        <div>
+
+        <div
+          className="flex justify-center relative "
+          style={{
+            width: "auto",
+            maxHeight: "100vh",
+            aspectRatio: "9/16",
+          }}
+        >
+          <div className="absolute bottom-3 left-1 z-20 w-11/12">
+            <div className="w-full">
+              <div
+                role="button"
+                className="flex gap-2 items-center py-2 text-white"
+                style={{ width: "100%" }}
+              >
+                <AvtarUserwithFollowbtn
+                  data={{
+                    userName: data.userName,
+                    userId: data.userId,
+                    profilePictureName: data.profilePhotoName,
+                  }}
+                  followclass={{ border: "2px solid white", color: "white" }}
+                  alt=""
+                />
+              </div>
+              <div>
+                <span>{postUserName}</span>
+                <EllipsisTextUptoTwo
+                  color="white"
+                  text={data.caption}
+                ></EllipsisTextUptoTwo>
+              </div>
+              {likeCount !== 0 && (
+                <div role="button" className="text-white">
+                  <div
+                    onClick={() => handleListOpen("Likes")}
+                    className="flex gap-3 items-center"
+                  >
+                    <AvtarGroupthree data={data.postLikes} /> {likeCount} liked
+                    by {data.postLikes[0].userName}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="absolute bottom-28 right-0 z-20">
+            <Stack
+              direction={"column"}
+              justifyContent={"space-between"}
+              spacing={2}
+            >
+              <Stack direction={"column"} sx={{ width: "fit-content" }}>
+                <IconButton onClick={handleLike}>
+                  <img
+                    src={isLike ? assets.likedRedIcon : assets.notificationIcon}
+                    alt="like"
+                    width={"30px"}
+                  ></img>
+                </IconButton>
+                <IconButton onClick={openCommentsection}>
+                  <img src={assets.commentIcon} alt="like" width={"30px"}></img>
+                </IconButton>
+                <IconButton>
+                  <img src={assets.shareIcon} alt="like" width={"30px"}></img>
+                </IconButton>
+              </Stack>
+              <div>
+                {postUserName === user.userName ||
+                  (true && (
+                    <PopupState variant="popover" popupId="setting">
+                      {(popupState) => (
+                        <React.Fragment>
+                          <IconButton
+                            variant="contained"
+                            {...bindTrigger(popupState)}
+                          >
+                            <MoreHorizIcon sx={{ color: "white" }} />
+                          </IconButton>
+                          <Menu {...bindMenu(popupState)}>
+                            <MenuItem
+                              className="text-red-500"
+                              onClick={handleDeletePost}
+                            >
+                              Delete
+                            </MenuItem>
+                          </Menu>
+                        </React.Fragment>
+                      )}
+                    </PopupState>
+                  ))}
+              </div>
+            </Stack>
+          </div>
           {loader ? (
             <img
               src={
@@ -333,118 +380,96 @@ const PostContainer = ({
                 src={imgList[index].src}
                 autoPlay
                 loop
-                className="rounded"
-                style={{ width: "100%", maxHeight: "60vh" }}
+                className="rounded "
+                style={{
+                  width: "100%",
+                  height: "100vh",
+                  aspectRatio: "9/16",
+                  objectFit: "cover",
+                }}
                 alt=""
                 loading="lazy"
               ></video>
             )
           )}
-        </div>
-      </div>
-      <Stack direction={"row"} justifyContent={"space-between"} spacing={2}>
-        <Stack direction={"row"} sx={{ width: "fit-content" }}>
-          <IconButton onClick={handleLike}>
-            <img
-              src={isLike ? assets.likedRedIcon : assets.notificationIcon}
-              alt="like"
-              width={"30px"}
-            ></img>
-          </IconButton>
-          <IconButton onClick={openCommentsection}>
-            <img src={assets.commentIcon} alt="like" width={"30px"}></img>
-          </IconButton>
-          <IconButton>
-            <img src={assets.shareIcon} alt="like" width={"30px"}></img>
-          </IconButton>
-        </Stack>
-        <IconButton>
-          <img src={assets.bookmarkIcon} alt="like" width={"30px"}></img>
-        </IconButton>
-      </Stack>
-      {likeCount !== 0 && (
-        <div role="button">
+
+          {/* commentbox start */}
           <div
-            onClick={() => handleListOpen("Likes")}
-            className="flex gap-3 items-center"
+            className={`${
+              openComment ? "block" : "hidden"
+            } h-3/4 w-full bg-white flex flex-col  border-2 border-t rounded-t-lg rounded-r-lg absolute commentbox`}
+            style={{
+              aspectRatio: "9/16",
+            }}
           >
-            <AvtarGroupthree data={data.postLikes} /> {likeCount} likes
+            <div className="w-full flex justify-between items-center border-b-2">
+              <span></span>
+              <span>Comments</span>
+              <IconButton onClick={openCommentsection}>
+                <CloseIcon />
+              </IconButton>
+            </div>
+            <div className="overflow-scroll h-full">
+              {data.postComments && data.postComments.length > 0 ? (
+                <>
+                  {data.postComments.map((element) => {
+                    return (
+                      <div
+                        className="flex justify-between items-center text-white"
+                        key={element.commentId}
+                      >
+                        <AvtarUserwithName
+                          data={{
+                            userName: element.userName,
+                            userId: element.userId,
+                            profilePictureName: element.avtar,
+                          }}
+                          comment={element.commentText}
+                        ></AvtarUserwithName>
+                        {element.userId === user.userId && (
+                          <IconButton
+                            aria-label="delete"
+                            size="large"
+                            onClick={() => deleteCommment(element.commentId)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        )}
+                      </div>
+                    );
+                  })}
+                </>
+              ) : (
+                <div className="flex h-full justify-center items-center">
+                  No Comments Yet, Add Your
+                </div>
+              )}
+            </div>
+            <div className=" bottom-0 absolute w-full bg-white">
+              <TextField
+                onChange={handleCommentChange}
+                inputRef={commentBox}
+                {...dynamicInputProps}
+                fullWidth
+                id="standard-multiline-flexible"
+                label="Add a comment"
+                multiline
+                maxRows={4}
+                variant="standard"
+              />
+            </div>
           </div>
+          {/* commentbox end */}
         </div>
-      )}
-      <div>
-        <span>{postUserName}</span>
-        <EllipsisTextUptoTwo text={data.caption}></EllipsisTextUptoTwo>
       </div>
-      <div className="my-2">
+
+      {/* <div className="my-2">
         {data.postComments.length > 0 && (
           <span role="button" onClick={openCommentsection}>
             View all {data.postComments.length} comments
           </span>
         )}
-      </div>
-      <div
-        className={`${
-          openComment ? "block" : "hidden"
-        } h-full bg-white flex flex-col  border-2 border-t rounded-t-lg rounded-r-lg absolute commentbox`}
-      >
-        <div className="w-full flex justify-between items-center border-b-2">
-          <span></span>
-          <span>Comments</span>
-          <IconButton onClick={openCommentsection}>
-            <CloseIcon />
-          </IconButton>
-        </div>
-        <div className="overflow-scroll h-full">
-          {data.postComments && data.postComments.length > 0 ? (
-            <>
-              {data.postComments.map((element) => {
-                return (
-                  <div
-                    className="flex justify-between items-center"
-                    key={element.commentId}
-                  >
-                    <AvtarUserwithName
-                      data={{
-                        userName: element.userName,
-                        userId: element.userId,
-                        profilePictureName: element.avtar,
-                      }}
-                      comment={element.commentText}
-                    ></AvtarUserwithName>
-                    {element.userId === user.userId && (
-                      <IconButton
-                        aria-label="delete"
-                        size="large"
-                        onClick={() => deleteCommment(element.commentId)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    )}
-                  </div>
-                );
-              })}
-            </>
-          ) : (
-            <div className="flex h-full justify-center items-center">
-              No Comments Yet, Add Your
-            </div>
-          )}
-        </div>
-        <div className=" bottom-0 absolute w-full bg-white">
-          <TextField
-            onChange={handleCommentChange}
-            inputRef={commentBox}
-            {...dynamicInputProps}
-            fullWidth
-            id="standard-multiline-flexible"
-            label="Add a comment"
-            multiline
-            maxRows={4}
-            variant="standard"
-          />
-        </div>
-      </div>
+      </div> */}
 
       <Modal open={openListModal} onClose={handleClose}>
         <Box sx={style} className="rounded">
@@ -486,4 +511,4 @@ const PostContainer = ({
   );
 };
 
-export default PostContainer;
+export default ReelContainer;

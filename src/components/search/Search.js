@@ -1,5 +1,5 @@
 import { IconButton, Stack, CircularProgress } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import CustomInputField from "../custominputs/CustomInputField";
 import { useSelectorUserState } from "../../redux/slices/AuthSlice";
@@ -17,6 +17,7 @@ const Search = ({ closeDrawer }) => {
   const [isLoader, setIsLoader] = useState(false);
 
   const dispatch = useDispatch();
+  const observer = useRef();
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -47,10 +48,24 @@ const Search = ({ closeDrawer }) => {
     setPageNumber(1);
   };
 
-  const loadMoreResults = () => {
+  const loadMoreResults = useCallback(() => {
     setIsLoader(true);
     setPageNumber((prev) => prev + 1);
-  };
+  }, []);
+
+  const lastResultElementRef = useCallback(
+    (node) => {
+      if (isLoader) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && isMoreResults) {
+          loadMoreResults();
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [isLoader, isMoreResults, loadMoreResults]
+  );
 
   return (
     <div>
@@ -70,19 +85,31 @@ const Search = ({ closeDrawer }) => {
         </div>
       </div>
       <Stack spacing={3} overflow="scroll">
-        {result.map((element) => (
-          <AvtarUserwithFollowbtn
-            key={element.userId}
-            data={element}
-            onclick={closeDrawer}
-            setResult={setResult}
-          />
-        ))}
-        {isMoreResults && (
-          <div className="text-center p-4" onClick={loadMoreResults}>
-            <p role="button" className="text-cyan-600 p-3">
-              {isLoader ? <CircularProgress /> : "Load More"}
-            </p>
+        {result.map((element, index) => {
+          if (result.length === index + 1) {
+            return (
+              <div ref={lastResultElementRef} key={element.userId}>
+                <AvtarUserwithFollowbtn
+                  data={element}
+                  onclick={closeDrawer}
+                  setResult={setResult}
+                />
+              </div>
+            );
+          } else {
+            return (
+              <AvtarUserwithFollowbtn
+                key={element.userId}
+                data={element}
+                onclick={closeDrawer}
+                setResult={setResult}
+              />
+            );
+          }
+        })}
+        {isLoader && (
+          <div className="text-center p-4">
+            <CircularProgress />
           </div>
         )}
       </Stack>

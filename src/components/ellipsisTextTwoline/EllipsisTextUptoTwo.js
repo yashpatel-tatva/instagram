@@ -1,32 +1,28 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./EllipsisTextUptoTwo.css";
-import LinesEllipsis from "react-lines-ellipsis";
 
-const EllipsisTextUptoTwo = ({ text }) => {
+const EllipsisTextUptoTwo = ({ text, color = "black" }) => {
   const [expanded, setExpanded] = useState(false);
   const [needsTruncation, setNeedsTruncation] = useState(true);
-  const tempRef = useRef(null);
   const containerRef = useRef(null);
 
   useEffect(() => {
-    if (tempRef.current && containerRef.current && text) {
-      // Clear any previous measurements
-      containerRef.current.innerHTML = "";
-
-      // Create a temporary span element to measure text
-      const tempElement = document.createElement("span");
-      tempElement.style.whiteSpace = "normal";
-      tempElement.style.display = "inline";
-      tempElement.style.visibility = "hidden";
-      tempElement.innerHTML = text;
-      containerRef.current.appendChild(tempElement);
+    if (containerRef.current && text) {
+      // Use a hidden div for measurement
+      const hiddenDiv = document.createElement("div");
+      hiddenDiv.style.position = "absolute";
+      hiddenDiv.style.visibility = "hidden";
+      hiddenDiv.style.whiteSpace = "normal";
+      hiddenDiv.style.width = containerRef.current.offsetWidth + "px";
+      hiddenDiv.innerHTML = text;
+      document.body.appendChild(hiddenDiv);
 
       // Compare heights
       const needsTruncate =
-        tempElement.offsetHeight > containerRef.current.offsetHeight;
+        hiddenDiv.offsetHeight > containerRef.current.offsetHeight;
 
       // Clean up
-      containerRef.current.innerHTML = "";
+      document.body.removeChild(hiddenDiv);
 
       // Update state
       setNeedsTruncation(needsTruncate);
@@ -38,28 +34,33 @@ const EllipsisTextUptoTwo = ({ text }) => {
   }
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} style={{ minHeight: "30px", color: color }}>
       {expanded || !needsTruncation ? (
         <>
           {text}
-          {/* {needsTruncation && (
+          {needsTruncation && (
             <button
               onClick={() => setExpanded(false)}
               className="font-semibold text-slate-600 ps-14"
             >
               Show less
             </button>
-          )} */}
+          )}
         </>
       ) : (
         <>
-          <LinesEllipsis
-            text={text}
-            maxLine={2}
-            ellipsis="..."
-            trimRight
-            basedOn="letters"
-          />
+          <div
+            style={{
+              color: color,
+              overflow: "hidden",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {text}
+          </div>
           {needsTruncation && (
             <button
               onClick={() => setExpanded(true)}

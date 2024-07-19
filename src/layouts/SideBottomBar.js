@@ -262,7 +262,7 @@ const SideBottomBar = ({ children }) => {
                 </div>
               )}
             </NavLink>
-            <div onClick={toggleSearchDrawer(true)}>
+            {/* <div onClick={toggleSearchDrawer(true)}>
               <div
                 role="button"
                 className={`flex gap-2 items-center ${
@@ -276,7 +276,24 @@ const SideBottomBar = ({ children }) => {
                 />
                 <span className="md:hidden">Search</span>
               </div>
-            </div>
+            </div> */}
+            <NavLink to={AllRoutes.Explore}>
+              {({ isActive }) => (
+                <div
+                  role="button"
+                  className={`flex gap-2 items-center ${
+                    isActive ? "text-blue-500" : "text-gray-500"
+                  }`}
+                >
+                  <img
+                    src={isActive ? assets.searchActiveIcon : assets.searchIcon}
+                    width={"28px"}
+                    alt=""
+                  />
+                  <span className="md:hidden">Explore</span>
+                </div>
+              )}
+            </NavLink>
             <NavLink to={AllRoutes.Reels}>
               {({ isActive }) => (
                 <div

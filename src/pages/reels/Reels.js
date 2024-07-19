@@ -40,7 +40,7 @@ const Reels = () => {
     setIsReelLoader(true);
     const data = {
       pageNumber: pageNumberReel,
-      pageSize: 3,
+      pageSize: 1,
       searchName: "",
       model: {
         postType: "Reel",

@@ -36,24 +36,26 @@ const AvtarUserwithFollowbtn = ({ data, onclick, setResult, followclass }) => {
         onClick={onclick}
         data={{ ...data, name: "NoNeedName" }}
       ></AvtarUserwithName>
-      <LoadingButton
-        loading={loader}
-        variant="text"
-        disabled={loader}
-        onClick={() => handleFollowClick(data.userId)}
-        size="small"
-        sx={followclass}
-      >
-        {data.isFollowing ? (
-          <>Following</>
-        ) : data.isRequest ? (
-          <>Requested</>
-        ) : data.isFollower ? (
-          <>Follow Back</>
-        ) : (
-          <>Follow</>
-        )}
-      </LoadingButton>
+      {userid.toString() !== data.userId.toString() && (
+        <LoadingButton
+          loading={loader}
+          variant="text"
+          disabled={loader}
+          onClick={() => handleFollowClick(data.userId)}
+          size="small"
+          sx={followclass}
+        >
+          {data.isFollowing ? (
+            <>Following</>
+          ) : data.isRequest ? (
+            <>Requested</>
+          ) : data.isFollower ? (
+            <>Follow Back</>
+          ) : (
+            <>Follow</>
+          )}
+        </LoadingButton>
+      )}
     </div>
   );
 };

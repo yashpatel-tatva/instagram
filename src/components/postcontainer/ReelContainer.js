@@ -19,6 +19,7 @@ import {
   deletecommentonpost,
   deletepost,
   getmediafromname,
+  getotheruserdata,
   getpostbyid,
   getpostfollowerfollowingcount,
   likeunlikepost,
@@ -228,9 +229,25 @@ const ReelContainer = ({ postdata, postUserName }) => {
   };
   const handleClose = () => setOpenListModal(false);
 
+  const [postUserData, setPostUserData] = useState();
+
+  useEffect(() => {
+    const fetch = async () => {
+      const userdata = await dispatch(getotheruserdata(data.userId));
+      setPostUserData(userdata.payload);
+    };
+    fetch();
+  }, []);
+
+  async function updatefollow() {
+    const userdata = await dispatch(getotheruserdata(data.userId));
+    setPostUserData(userdata.payload);
+  }
+
   if (isDeleted) {
     return null; // Do not render if deleted
   }
+
   return (
     <div
       value={updaterender}
@@ -277,7 +294,7 @@ const ReelContainer = ({ postdata, postUserName }) => {
             aspectRatio: "9/16",
           }}
         >
-          <div className="absolute bottom-3 left-1 z-20 w-11/12">
+          <div className="absolute bottom-3 fm:bottom-11 left-1 z-20 w-11/12">
             <div className="w-full">
               <div
                 role="button"
@@ -286,12 +303,14 @@ const ReelContainer = ({ postdata, postUserName }) => {
               >
                 <AvtarUserwithFollowbtn
                   data={{
+                    ...postUserData,
                     userName: data.userName,
                     userId: data.userId,
                     profilePictureName: data.profilePhotoName,
                   }}
                   followclass={{ border: "2px solid white", color: "white" }}
                   alt=""
+                  setResult={updatefollow}
                 />
               </div>
               <div>

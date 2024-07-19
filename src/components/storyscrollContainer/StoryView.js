@@ -64,7 +64,6 @@ const StoryView = forwardRef(
       data.storyName,
       data.userId,
       dispatch,
-      handleCloseStoryView,
       handleseen,
       isNext,
       next,

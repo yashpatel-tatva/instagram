@@ -19,6 +19,7 @@ import PostContainer from "../../components/postcontainer/PostContainer";
 import FilterNoneIcon from "@mui/icons-material/FilterNone";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
+import { assets } from "../../constants/Assets";
 
 const Explore = () => {
   const dispatch = useDispatch();
@@ -142,8 +143,19 @@ const Explore = () => {
     postindex < postfeedList.length - 1 && setPostIndex((n) => n + 1);
   const prev = () => postindex > 0 && setPostIndex((n) => n - 1);
 
+  function opensearch() {
+    document.getElementsByClassName("searchbtn")[0].click();
+  }
   return (
     <div>
+      <div className="hidden fm:flex w-full  p-2">
+        <div
+          className="border-2 w-full flex gap-4 p-1 rounded-lg"
+          onClick={opensearch}
+        >
+          <img src={assets.searchActiveIcon} width={"20px"} alt="" /> Search
+        </div>
+      </div>
       <ImageList cols={3} gap={0}>
         {imgList.map((item, index) => {
           if (imgList.length === index + 1) {

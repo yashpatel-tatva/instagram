@@ -66,7 +66,7 @@ export const Home = () => {
     setIsPostLoader(true);
     const data = {
       pageNumber: pageNumberPost,
-      pageSize: 6,
+      pageSize: 2,
       searchName: "",
       model: {
         postType: "",

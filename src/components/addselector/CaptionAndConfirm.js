@@ -90,6 +90,7 @@ const CaptionAndConfirm = (data) => {
     }
     return new Blob([ab], { type: mimeString });
   }
+
   return (
     <Backdrop open={open} sx={{ zIndex: "1000" }}>
       <div className="relative w-full h-2/3 fm:h-full bg-white z-10">

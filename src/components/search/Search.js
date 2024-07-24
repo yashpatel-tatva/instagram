@@ -62,7 +62,7 @@ const Search = ({ closeDrawer }) => {
           loadMoreResults();
         }
       });
-      if (node) observer.current.observe(node);
+      if (node);
     },
     [isLoader, isMoreResults, loadMoreResults]
   );
